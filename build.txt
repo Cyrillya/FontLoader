@@ -1,0 +1,4 @@
+displayName = Font Loader
+author = Cyrilly
+version = 0.1
+dllReferences = SharpFont.NetStandard, Velentr.Font.FNA, Velentr.Collections
