@@ -1,0 +1,10 @@
+Configs: {
+	Config: {
+		DisplayName: Config
+
+		MouseTextFont: {
+			Label: Mouse Text Font
+			Tooltip: ""
+		}
+	}
+}

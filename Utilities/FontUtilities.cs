@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using ReLogic.Content;
 using ReLogic.Graphics;
 using Terraria.GameContent;
@@ -40,5 +42,14 @@ public static class FontUtilities
         }
 
         return 1f;
+    }
+
+    public static bool IsTtfOrOtfFile(string filePath)
+    {
+        string extension = Path.GetExtension(filePath);
+
+        // Check if the extension is either .ttf or .otf (case-insensitive)
+        return extension.Equals(".ttf", StringComparison.OrdinalIgnoreCase) ||
+               extension.Equals(".otf", StringComparison.OrdinalIgnoreCase);
     }
 }

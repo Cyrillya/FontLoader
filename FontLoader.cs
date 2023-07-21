@@ -1,4 +1,4 @@
-#define UsePublicizer
+// #define USE_PUBLICIZER
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,8 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.UI;
+using Terraria.GameContent.UI.Chat;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -89,7 +91,7 @@ public class FontLoader : Mod
 
     private static bool _vanillaMeasureString;
     private static bool _unloading;
-    private static FontManager _manager;
+    internal static FontManager Manager;
     internal static FontCollection FontDeathText;
     internal static FontCollection FontMouseText;
     internal static FontCollection FontCombatText;
@@ -98,12 +100,12 @@ public class FontLoader : Mod
 
     public override void Load() {
         string targetFilePath = AppDomain.CurrentDomain.BaseDirectory; // 保存目标路径
-        const string targetFileName = "freetype6.dll"; // 保存目标文件名
+        const string targetFileName = @"Libraries\Native\Windows\freetype6.dll"; // 保存目标文件名
 
         string fullPath = Path.Combine(targetFilePath, targetFileName);
 
         try {
-            using var fileStream = GetFileStream(targetFileName);
+            using var fileStream = GetFileStream("freetype6.dll");
             using var targetStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
 
             fileStream.CopyTo(targetStream);
@@ -116,15 +118,15 @@ public class FontLoader : Mod
 
         NativeLibrary.Load(fullPath);
 
-        var pingfangPath = @"F:\Downloads\Compressed\苹方字体19.0d3e2版本_2\苹方-简 中粗体.otf";
-        var andybPath = @"D:\Program Files (x86)\Epic Games\Launcher\Engine\Content\Slate\Fonts\Roboto-Bold.ttf";
+        var pingfangPath = @"F:\Downloads\Compressed\苹方字体19.0d3e2版本_2\苹方-简 常规体.otf";
+        var andybPath = @"D:\Program Files (x86)\Epic Games\Launcher\Engine\Content\Slate\Fonts\Roboto-Regular.ttf";
         // var fontPath = @"C:\Users\Administrator\AppData\Local\Microsoft\FontCache\4\CloudFonts\Microsoft YaHei\47849284094.ttf";
-        _manager = new FontManager(Main.instance.GraphicsDevice);
-        FontDeathText = new FontCollection(_manager, (andybPath, 42, 0, 255), (pingfangPath, 48, 0, 9999999));
-        FontMouseText = new FontCollection(_manager, (andybPath, 17, 0, 255), (pingfangPath, 19, 0, 9999999));
-        FontCombatText = new FontCollection(_manager, (andybPath, 18, 0, 255), (pingfangPath, 20, 0, 9999999));
-        FontCombatCrit = new FontCollection(_manager, (andybPath, 24, 0, 255), (pingfangPath, 25, 0, 9999999));
-        FontItemStack = new FontCollection(_manager, (andybPath, 15, 0, 255), (pingfangPath, 15, 0, 9999999));
+        Manager = new FontManager(Main.instance.GraphicsDevice);
+        FontDeathText = new FontCollection(Manager, (andybPath, 42, 0, 255), (pingfangPath, 48, 0, 9999999));
+        FontMouseText = new FontCollection(Manager, (andybPath, 17, 0, 255), (pingfangPath, 19, 0, 9999999));
+        FontCombatText = new FontCollection(Manager, (andybPath, 18, 0, 255), (pingfangPath, 20, 0, 9999999));
+        FontCombatCrit = new FontCollection(Manager, (andybPath, 24, 0, 255), (pingfangPath, 25, 0, 9999999));
+        FontItemStack = new FontCollection(Manager, (andybPath, 15, 0, 255), (pingfangPath, 15, 0, 9999999));
 
         MonoModHooks.Add(
             typeof(DynamicSpriteFont).GetMethod("InternalDraw", BindingFlags.Instance | BindingFlags.NonPublic),
@@ -177,76 +179,18 @@ public class FontLoader : Mod
                 ChatManager.DrawColorCodedString(spriteBatch, font, text, position + new Vector2(spread), baseColor,
                     rotation, origin, baseScale, maxWidth);
             };
-
-        // 这个必须留着，不然UIText中运行CreateWrappedText时，Hook没用，也不知道为什么
-        On_UIText.InternalSetText += (orig, self, text, scale, large) => orig.Invoke(self, text, scale, large);
-
-#if UsePublicizer
-        // 虽然这就是把源码复制了一遍，但是不知道为啥不这样的话我DrawColorCodedStringShadow的Hook就没法应用到这上面
-        On_UIText.DrawSelf += (orig, self, spriteBatch) => {
-            self.VerifyTextState();
-            CalculatedStyle innerDimensions = self.GetInnerDimensions();
-            Vector2 position = innerDimensions.Position();
-            if (self._isLarge)
-                position.Y -= 10f * self._textScale;
-            else
-                position.Y -= 2f * self._textScale;
-
-            position.X += (innerDimensions.Width - self._textSize.X) * self.TextOriginX;
-            position.Y += (innerDimensions.Height - self._textSize.Y) * self.TextOriginY;
-            float num = self._textScale;
-            if (self.DynamicallyScaleDownToWidth && self._textSize.X > innerDimensions.Width)
-                num *= innerDimensions.Width / self._textSize.X;
-
-            DynamicSpriteFont value = (self._isLarge ? FontAssets.DeathText : FontAssets.MouseText).Value;
-            Vector2 vector = value.MeasureString(self._visibleText);
-            Color baseColor = self._shadowColor * ((float)(int)self._color.A / 255f);
-            Vector2 origin = new Vector2(0f, 0f) * vector;
-            Vector2 baseScale = new Vector2(num);
-            TextSnippet[] snippets = ChatManager.ParseMessage(self._visibleText, self._color).ToArray();
-            ChatManager.ConvertNormalSnippets(snippets);
-            ChatManager.DrawColorCodedStringShadow(spriteBatch, value, snippets, position, baseColor, 0f, origin, baseScale, -1f, 1.5f);
-            ChatManager.DrawColorCodedString(spriteBatch, value, snippets, position, Color.White, 0f, origin, baseScale, out var _, -1f);
-        };
         
+        // 这个必须留着，不然有些Hook没用，可能是因为内联了，而这边On_再Hook一次并调用原方法就不会内联了
+        // On_Main.MouseTextInner += (orig, self, info) => orig.Invoke(self, info);
+        On_UIText.InternalSetText += (orig, self, text, scale, large) => orig.Invoke(self, text, scale, large);
+        On_UIText.DrawSelf += (orig, self, spriteBatch) => orig.Invoke(self, spriteBatch);
+        On_RemadeChatMonitor.DrawChat += (orig, self, chat) => orig.Invoke(self, chat);
+        On_GameTipsDisplay.Draw += (orig, self) => orig.Invoke(self);
         MonoModHooks.Add(
-            typeof(UIAutoScaleTextTextPanel<LocalizedText>).GetMethod("DrawSelf", BindingFlags.NonPublic | BindingFlags.Instance),
-            (Action<object, SpriteBatch> orig, object self, SpriteBatch spriteBatch) => {
-                if (Program.IsMainThread || self is not UIAutoScaleTextTextPanel<LocalizedText> textPanel) {
-                    orig.Invoke(self, spriteBatch);
-                    return;
-                }
+            typeof(UIAutoScaleTextTextPanel<LocalizedText>).GetMethod("DrawSelf",
+                BindingFlags.NonPublic | BindingFlags.Instance),
+            (Action<object, SpriteBatch> orig, object self, SpriteBatch spriteBatch) => orig.Invoke(self, spriteBatch));
 
-                if (float.IsNaN(textPanel.TextScale))
-                    textPanel.Recalculate();
-
-                if (textPanel.DrawPanel) {
-                    if (textPanel._needsTextureLoading) {
-                        textPanel._needsTextureLoading = false;
-                        textPanel.LoadTextures();
-                    }
-
-                    if (textPanel._backgroundTexture != null)
-                        textPanel.DrawPanel(spriteBatch, textPanel._backgroundTexture.Value, textPanel.BackgroundColor);
-
-                    if (textPanel._borderTexture != null)
-                        textPanel.DrawPanel(spriteBatch, textPanel._borderTexture.Value, textPanel.BorderColor);
-                }
-
-                var innerDimensions = textPanel.GetDimensions().ToRectangle();
-                innerDimensions.Inflate(-4, 0);
-                innerDimensions.Y += 8;
-                innerDimensions.Height -= 8;
-                for (int i = 0; i < textPanel.textStrings.Length; i++) {
-                    //Vector2 pos = innerDimensions.Center.ToVector2() + drawOffsets[i];
-                    Vector2 pos = innerDimensions.TopLeft() + textPanel.drawOffsets[i];
-                    if (textPanel.IsLarge)
-                        Utils.DrawBorderStringBig(spriteBatch, textPanel.textStrings[i], pos, textPanel.TextColor, textPanel.TextScale, 0f, 0f, -1);
-                    else
-                        Utils.DrawBorderString(spriteBatch, textPanel.textStrings[i], pos, textPanel.TextColor, textPanel.TextScale, 0f, 0f, -1);
-                }
-            });
-#endif
 
         // Main.OnPostDraw += DrawingTest;
     }
@@ -254,7 +198,7 @@ public class FontLoader : Mod
     public override void Unload() {
         // Main.OnPostDraw -= DrawingTest;
         _unloading = true;
-        _manager.Dispose();
+        Manager.Dispose();
         FontDeathText.Dispose();
         FontMouseText.Dispose();
         FontCombatText.Dispose();
