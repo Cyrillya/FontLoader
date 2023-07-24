@@ -24,30 +24,37 @@ public static class Loader
                 Language.GetTextValue(mod.GetLocalizationKey("PlatformNotSupported")));
         }
 
-        var config = ModContent.GetInstance<Config>();
-
         ProvideFreeTypeDll(mod);
-        LoadInternalFonts(mod);
-        ProvideFonts(config.FontPath, config.AltFontPath);
-        LoadInstalledFonts();
+        LoadInternalFont(mod);
+        LoadFonts();
         DetourLoader.Load();
         RenderTargetHolder.Load();
         // TestContents.Load();
 
         ModLoaded = true;
     }
+    
+    public static void LoadFonts() {
+        var config = ModContent.GetInstance<Config>();
+        ProvideFonts(config.FontPath, config.AltFontPath);
+        LoadInstalledFonts();
+    }
 
     internal static void ProvideFonts(string mainPath, string altPath) {
+        if (!ModLoaded) {
+            ModUtilities.SetLoadingText("Applying Selected Fonts");
+        }
+
         mainPath ??= "";
         altPath ??= "";
         byte[] mainFontBytes;
         byte[] altFontBytes;
         if (!ModUtilities.IsTtfOrOtfFile(mainPath)) {
             if (!ModUtilities.IsTtfOrOtfFile(altPath)) {
-                mainFontBytes = FontStatics.PingFangBytes;
-                altFontBytes = FontStatics.RobotoBytes;
+                mainFontBytes = Statics.PingFangBytes;
+                altFontBytes = Statics.PingFangBytes;
                 mainPath = "PingFangInternal";
-                altPath = "RobotoInternal";
+                altPath = "PingFangInternal";
             }
             else {
                 mainFontBytes = File.ReadAllBytes(altPath);
@@ -67,20 +74,24 @@ public static class Loader
         }
 
         FontCollection GetFontCollection(int size) =>
-            new(FontStatics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, size);
+            new(Statics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, size);
 
         // var fontPath = @"C:\Users\Administrator\AppData\Local\Microsoft\FontCache\4\CloudFonts\Microsoft YaHei\47849284094.ttf";
-        FontStatics.Manager = new FontManager(Main.instance.GraphicsDevice);
-        FontStatics.FontMouseText = GetFontCollection(18);
-        FontStatics.FontCombatText = GetFontCollection(19);
-        FontStatics.FontCombatCrit = GetFontCollection(24);
-        FontStatics.FontItemStack = GetFontCollection(15);
-        FontStatics.FontDeathText = GetFontCollection(45);
+        Statics.Manager = new FontManager(Main.instance.GraphicsDevice);
+        Statics.FontMouseText = GetFontCollection(18);
+        Statics.FontCombatText = GetFontCollection(19);
+        Statics.FontCombatCrit = GetFontCollection(24);
+        Statics.FontItemStack = GetFontCollection(15);
+        Statics.FontDeathText = GetFontCollection(45);
     }
 
     internal static void LoadInstalledFonts() {
         // 在Config里写了开启新线程加载，防止多个线程同时执行方法，这里加个判断
         if (InstalledFontLoading) return;
+
+        if (!ModLoaded) {
+            ModUtilities.SetLoadingText("Loading Installed Fonts");
+        }
 
         var config = ModContent.GetInstance<Config>();
 
@@ -112,18 +123,34 @@ public static class Loader
         }
 
         foreach (var fontFile in allFontFiles) {
-            FontStatics.Manager.GetMinimalFont(fontFile);
+            Statics.Manager.GetMinimalFont(fontFile);
         }
 
         InstalledFontLoading = false;
     }
 
-    internal static void LoadInternalFonts(Mod mod) {
-        FontStatics.PingFangBytes = mod.GetFileBytes("Assets/PingFang.otf");
-        FontStatics.RobotoBytes = mod.GetFileBytes("Assets/Roboto.ttf");
+    private static void LoadInternalFont(Mod mod) {
+        var config = ModContent.GetInstance<Config>();
+        if (config.UsePingFangLite) {
+            ModUtilities.SetLoadingText("Loading Internal Font");
+            Statics.PingFangBytes = mod.GetFileBytes("Assets/PingFangLite.otf");
+            return;
+        }
+
+        ModUtilities.SetLoadingText("Decompressing Internal Font");
+
+        var compressedBytes = mod.GetFileBytes("Assets/PingFang.otf.lzma");
+        var inStream = new MemoryStream(compressedBytes);
+        var outStream = new MemoryStream();
+        ModUtilities.Decompress(inStream, outStream);
+        outStream.Position = 0;
+        Statics.PingFangBytes = new byte[outStream.Length];
+        outStream.Read(Statics.PingFangBytes, 0, Statics.PingFangBytes.Length);
     }
 
     private static void ProvideFreeTypeDll(Mod mod) {
+        ModUtilities.SetLoadingText("Decompressing freetype6.dll");
+
         string targetFilePath = AppDomain.CurrentDomain.BaseDirectory; // 保存目标路径
         const string targetFileName = @"Libraries\Native\Windows\freetype6.dll"; // 保存目标文件名
 

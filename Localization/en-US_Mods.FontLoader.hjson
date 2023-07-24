@@ -35,6 +35,21 @@ Configs: {
 			Label: Open Config Option
 			Tooltip: ""
 		}
+
+		UseTextShadow: {
+			Label: Use Text Shadow
+			Tooltip: ""
+		}
+
+		UsePingFangLite: {
+			Label: Use Ping Fang Lite
+			Tooltip: ""
+		}
+
+		ResetOption: {
+			Label: Reset Option
+			Tooltip: ""
+		}
 	}
 
 	FontSearchDirectory: {

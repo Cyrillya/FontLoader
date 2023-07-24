@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using FontLoader.ConfigElements;
 using FontLoader.Core;
 using Velentr.Font;
@@ -17,19 +18,19 @@ public static class ModUtilities
     
     public static FontCollection GetVelentrFont(this DynamicSpriteFont dynamicSpriteFont) {
         if (dynamicSpriteFont == FontAssets.MouseText.Value) {
-            return FontStatics.FontMouseText;
+            return Statics.FontMouseText;
         }
         if (dynamicSpriteFont == FontAssets.DeathText.Value) {
-            return FontStatics.FontDeathText;
+            return Statics.FontDeathText;
         }
         if (dynamicSpriteFont == FontAssets.ItemStack.Value) {
-            return FontStatics.FontItemStack;
+            return Statics.FontItemStack;
         }
         if (dynamicSpriteFont == FontAssets.CombatText[0].Value) {
-            return FontStatics.FontCombatText;
+            return Statics.FontCombatText;
         }
         if (dynamicSpriteFont == FontAssets.CombatText[1].Value) {
-            return FontStatics.FontCombatCrit;
+            return Statics.FontCombatCrit;
         }
 
         return null;
@@ -100,11 +101,19 @@ public static class ModUtilities
         {
             int v = inStream.ReadByte();
             if (v < 0)
-                throw (new Exception("Can't Read 1"));
+                throw new Exception("Can't Read 1");
             outSize |= ((long)(byte)v) << (8 * i);
         }
 
         long compressedSize = inStream.Length - inStream.Position;
         decoder.Code(inStream, outStream, compressedSize, outSize, null);
+    }
+    
+    public static void SetLoadingText(string text)
+    {
+        Statics.LoadModsField ??= typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface")!.GetField("loadMods", BindingFlags.NonPublic | BindingFlags.Static)!;
+        Statics.SetTextMethod ??= typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UIProgress")!.GetProperty("SubProgressText")!.GetSetMethod()!;
+
+        Statics.SetTextMethod.Invoke(Statics.LoadModsField.GetValue(null), new object[] { text });
     }
 }

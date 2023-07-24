@@ -22,18 +22,45 @@ Configs: {
 		GeneralFontOffsetY: {
 			Label: 普通字体渲染偏移
 			Tooltip: 调整偏移值，使文本贴住白线。
-			// Text: Hello
+			Text: 全体目光向我看齐啊，看我看我
 		}
 
 		BigFontOffsetY: {
 			Label: 大型字体渲染偏移
 			Tooltip: 调整偏移值，使文本贴住白线。
-			// Text: Hello
+			Text: 我宣布个事
 		}
 
 		OpenConfigOption: {
 			Label: 打开配置文件
 			Tooltip: 配置选项只有被修改过一次后才会在文件中出现相应项
+		}
+
+		UseTextShadow: {
+			Label: 文字阴影
+			Tooltip:
+				'''
+				原先部分有描边的文字将会失去描边，而用阴影代替
+				这会提高文字渲染的性能，使文字更加美观
+				'''
+		}
+
+		UsePingFangLite: {
+			Label: 加载时使用简化版苹方字体
+			Tooltip:
+				'''
+				会使本Mod提高大约6%的加载速度，降低10MB内存占用
+				但会导致部分中文字无法显示，仅推荐在纯英文环境下使用
+				'''
+		}
+
+		ResetOption: {
+			Label: 重新加载
+			Tooltip:
+				'''
+				重新加载字体，可能会让内存占用变小，也可能变多
+				作者码力太弱了，不会优化内存，你就把这个选项当黑箱看吧（
+				'''
 		}
 	}
 

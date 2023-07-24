@@ -11,18 +11,25 @@ public static class Unloader
 
         UnloadFonts();
         RenderTargetHolder.Unload();
+        UnloadStatics();
         // TestContents.Unload();
 
         Unloading = false;
     }
+    
+    internal static void UnloadStatics() {
+        Statics.PingFangBytes = null;
+        Statics.LoadModsField = null;
+        Statics.SetTextMethod = null;
+    }
 
     internal static void UnloadFonts() {
-        FontStatics.Manager?.Dispose();
-        FontStatics.FontDeathText = null;
-        FontStatics.FontMouseText = null;
-        FontStatics.FontCombatText = null;
-        FontStatics.FontCombatCrit = null;
-        FontStatics.FontItemStack = null;
-        FontStatics.Manager = null;
+        Statics.Manager?.Dispose();
+        Statics.FontDeathText = null;
+        Statics.FontMouseText = null;
+        Statics.FontCombatText = null;
+        Statics.FontCombatCrit = null;
+        Statics.FontItemStack = null;
+        Statics.Manager = null;
     }
 }

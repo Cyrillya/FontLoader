@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Xna.Framework.Graphics;
 using Velentr.Font;
 
 namespace FontLoader.Core;
 
-public class FontStatics
+public class Statics
 {
     internal static FontManager Manager;
     internal static FontCollection FontDeathText;
@@ -13,5 +14,6 @@ public class FontStatics
     internal static FontCollection FontCombatCrit;
     internal static FontCollection FontItemStack;
     internal static byte[] PingFangBytes;
-    internal static byte[] RobotoBytes;
+    internal static FieldInfo LoadModsField;
+    internal static MethodInfo SetTextMethod;
 }

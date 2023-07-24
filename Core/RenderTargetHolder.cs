@@ -27,6 +27,7 @@ internal class RenderTargetHolder
 
     internal static void Unload() {
         TargetLookup = null;
+        _requestQueue = null;
     }
 
     internal static void Clear() {

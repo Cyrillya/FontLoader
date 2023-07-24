@@ -63,7 +63,7 @@ public class FontSelectionElement : ConfigElement<string>
                 fontNameText.SetText("NONE");
             }
 
-            foreach (var fonts in FontStatics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
+            foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
                 foreach (var font in fonts) {
                     if (font.TypefaceName != Value) continue;
 
@@ -194,7 +194,7 @@ public class FontSelectionElement : ConfigElement<string>
     }
 
     private IEnumerable<FontElement> CreateDefinitionOptionElementList() {
-        foreach (var fonts in FontStatics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
+        foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
             foreach (var font in fonts) {
                 var fontName = font.FullName;
                 if (OperatingSystem.IsWindows()) {
@@ -249,7 +249,7 @@ internal class OptionElement : UIImage
         FilePath = path;
         Tooltip = "Load failed!";
         if (File.Exists(path) && Utilities.ModUtilities.IsTtfOrOtfFile(path)) {
-            var fontName = FontStatics.Manager.GetTypeface(path)?.Name ?? "Load failed!";
+            var fontName = Statics.Manager.GetTypeface(path)?.Name ?? "Load failed!";
             Tooltip = fontName;
         }
     }

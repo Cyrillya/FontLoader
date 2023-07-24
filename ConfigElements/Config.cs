@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FontLoader.Core;
 using Terraria;
+using Terraria.GameContent;
+using Terraria.Localization;
 using Terraria.ModLoader.Config;
 using Velentr.Font;
 
@@ -42,6 +46,16 @@ public class Config : ModConfig
     [CustomModConfigItem(typeof(BigFontOffsetPreview))]
     public float BigFontOffsetY;
 
+    [DefaultValue(true)]
+    public bool UseTextShadow;
+
+    [ReloadRequired]
+    [DefaultValue(false)]
+    public bool UsePingFangLite;
+
+    [CustomModConfigItem(typeof(ResetElement))]
+    public object ResetOption;
+
     public override void OnChanged() {
         base.OnChanged();
         
@@ -51,7 +65,7 @@ public class Config : ModConfig
         if (Loader.InstalledFontLoading)
             return;
 
-        if (FontStatics.Manager is not null) {
+        if (Statics.Manager is not null) {
             Unloader.UnloadFonts();
         }
 
