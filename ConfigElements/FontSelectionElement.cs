@@ -1,90 +1,148 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
-using FontLoader.Utilities;
+using System.Threading.Tasks;
+using FontLoader.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using SharpFont;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
-using Terraria.Localization;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
-using Terraria.ModLoader.UI.Elements;
 using Terraria.UI;
-using Velentr.Font;
+using Color = Microsoft.Xna.Framework.Color;
 
 namespace FontLoader.ConfigElements;
 
 public class FontSelectionElement : ConfigElement<string>
 {
-    private static Dictionary<string, Font> _loadedFonts = new();
-
+    internal bool LoadingFonts { get; set; }
+    internal bool ValueNameUpdateNeeded { get; set; }
+    internal bool SettingUpOptions { get; set; }
     internal bool UpdateNeeded { get; set; }
     internal bool SelectionExpanded { get; set; }
     internal UIPanel ChooserPanel { get; set; }
-    internal UIGrid ChooserGrid { get; set; }
+    internal UIList ChooserList { get; set; }
     internal UIFocusInputTextField ChooserFilter { get; set; }
-    internal float OptionScale { get; set; } = 0.5f;
     internal List<FontElement> Options { get; set; }
-    internal OptionElement OptionChoice { get; set; }
+
+    private const float REGULAR_HEIGHT = 36f;
+    private const float EXPANDED_HEIGHT = 260f;
 
     public override void OnBind() {
         base.OnBind();
-        TextDisplayFunction = () => Label + ": " + OptionChoice.Tooltip;
-        if (List != null) {
-            TextDisplayFunction = () => Index + 1 + ": " + OptionChoice.Tooltip;
-        }
 
-        Height.Set(30f, 0f);
+        ValueNameUpdateNeeded = true;
 
-        OptionChoice = new OptionElement();
-        OptionChoice.Top.Set(2f, 0f);
-        OptionChoice.Left.Set(-30, 1f);
-        OptionChoice.OnLeftClick += (_, _) => {
+        DrawLabel = false;
+        Height.Set(REGULAR_HEIGHT, 0f);
+
+        var labelText = new UIText(Label, textScale: 0.9f) {
+            Top = {Pixels = 12},
+            Left = {Pixels = 10}
+        };
+        Append(labelText);
+
+        var fontNameText = new UIText(Label, textScale: 0.9f) {
+            Top = {Pixels = 12},
+            Left = {Pixels = -10},
+            Width = {Precent = 1f},
+            TextOriginX = 1f
+        };
+        fontNameText.OnUpdate += _ => {
+            if (!ValueNameUpdateNeeded) return;
+
+            ValueNameUpdateNeeded = false;
+
+            if (string.IsNullOrWhiteSpace(Value) || !File.Exists(Value)) {
+                fontNameText.SetText("NONE");
+            }
+
+            foreach (var fonts in FontStatics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
+                foreach (var font in fonts) {
+                    if (font.TypefaceName != Value) continue;
+
+                    var fontName = font.FullName;
+                    if (OperatingSystem.IsWindows()) {
+                        var pfc = new PrivateFontCollection();
+                        pfc.AddFontFile(font.TypefaceName);
+                        fontName = pfc.Families[0].Name;
+                    }
+
+                    fontNameText.SetText(fontName);
+                    return;
+                }
+            }
+        };
+        Append(fontNameText);
+
+        var invisibleClickBox = new UIPanel {
+            Width = {Precent = 1f},
+            Height = {Pixels = REGULAR_HEIGHT},
+            BackgroundColor = Color.Transparent,
+            BorderColor = Color.Transparent
+        };
+        invisibleClickBox.OnLeftClick += (_, _) => {
+            // 防止还在加载的时候就打开选择器
+            if (Loader.InstalledFontLoading) return;
             SelectionExpanded = !SelectionExpanded;
             UpdateNeeded = true;
         };
-        Append(OptionChoice);
+        Append(invisibleClickBox);
 
         ChooserPanel = new UIPanel();
-        ChooserPanel.Top.Set(30, 0);
+        ChooserPanel.Top.Set(REGULAR_HEIGHT, 0);
+        ChooserPanel.Left.Set(10, 0);
         ChooserPanel.Height.Set(200, 0);
-        ChooserPanel.Width.Set(0, 1);
-        ChooserPanel.BackgroundColor = Color.CornflowerBlue;
+        ChooserPanel.Width.Set(-20, 1);
+        ChooserPanel.SetPadding(2f);
+        ChooserPanel.BorderColor = Color.Transparent;
+        ChooserPanel.BackgroundColor = Color.Transparent;
 
-        var textBoxBackgroundA = new UIPanel();
-        textBoxBackgroundA.Width.Set(160, 0f);
-        textBoxBackgroundA.Height.Set(30, 0f);
-        textBoxBackgroundA.Top.Set(-6, 0);
-        textBoxBackgroundA.PaddingTop = 0;
-        textBoxBackgroundA.PaddingBottom = 0;
+        var textBoxBackground = new UIPanel {
+            PaddingTop = 0,
+            PaddingBottom = 0,
+            PaddingLeft = 0,
+            PaddingRight = 0,
+            BackgroundColor = Color.Transparent,
+            BorderColor = Color.Transparent
+        };
+        textBoxBackground.Width.Set(240, 0f);
+        textBoxBackground.Height.Set(30, 0f);
+        textBoxBackground.Top.Set(-6, 0);
+        textBoxBackground.Append(new UIHorizontalSeparator {
+            Top = new StyleDimension(-8f, 1f),
+            Width = StyleDimension.FromPercent(1f),
+            Color = Color.Lerp(Color.White, new Color(63, 65, 151, 255), 0.85f) * 0.9f
+        });
         ChooserFilter = new UIFocusInputTextField("Filter by Name");
-        ChooserFilter.OnTextChange += (a, b) => { UpdateNeeded = true; };
-        ChooserFilter.OnRightClick += (a, b) => ChooserFilter.SetText("");
+        ChooserFilter.OnTextChange += (_, _) => { UpdateNeeded = true; };
+        ChooserFilter.OnRightClick += (_, _) => ChooserFilter.SetText("");
         ChooserFilter.Width = StyleDimension.Fill;
         ChooserFilter.Height.Set(-6, 1f);
         ChooserFilter.Top.Set(6, 0f);
-        textBoxBackgroundA.Append(ChooserFilter);
-        ChooserPanel.Append(textBoxBackgroundA);
+        textBoxBackground.Append(ChooserFilter);
+        ChooserPanel.Append(textBoxBackground);
 
-        ChooserGrid = new UIGrid();
-        ChooserGrid.Top.Set(30, 0);
-        ChooserGrid.Height.Set(-30, 1);
-        ChooserGrid.Width.Set(-12, 1);
-        ChooserPanel.Append(ChooserGrid);
+        ChooserList = new UIList();
+        ChooserList.Top.Set(30, 0);
+        ChooserList.Height.Set(-30, 1);
+        ChooserList.Width.Set(-12, 1);
+        ChooserList.ManualSortMethod = _ => { }; // 不让他使用ManualSortMethod，我们在外面排过序了
+        ChooserPanel.Append(ChooserList);
 
-        UIScrollbar scrollbar = new UIScrollbar();
+        var scrollbar = new UIScrollbar();
         scrollbar.SetView(100f, 1000f);
         scrollbar.Height.Set(-30f, 1f);
         scrollbar.Top.Set(30f, 0f);
         scrollbar.Left.Pixels += 8;
         scrollbar.HAlign = 1f;
-        ChooserGrid.SetScrollbar(scrollbar);
+        ChooserList.SetScrollbar(scrollbar);
         ChooserPanel.Append(scrollbar);
         //Append(chooserPanel);
     }
@@ -97,49 +155,63 @@ public class FontSelectionElement : ConfigElement<string>
 
         UpdateNeeded = false;
 
-        if (SelectionExpanded && Options == null) {
-            Options = CreateDefinitionOptionElementList()?.ToList() ?? new List<FontElement>();
+        if (SelectionExpanded && Options is null) {
+            Task.Run(() => {
+                SettingUpOptions = true;
+                Options = CreateDefinitionOptionElementList()?.ToList() ?? new List<FontElement>();
+                SettingUpOptions = false;
+                UpdateNeeded = true;
+            });
         }
 
-        if (!SelectionExpanded)
-            ChooserPanel.Remove();
-        else
-            Append(ChooserPanel);
+        if (SettingUpOptions) return;
 
-        float newHeight = SelectionExpanded ? 240 : 30;
+        if (!SelectionExpanded) {
+            ChooserPanel.Remove();
+        }
+        else {
+            Append(ChooserPanel);
+        }
+
+        float newHeight = SelectionExpanded ? EXPANDED_HEIGHT : REGULAR_HEIGHT;
         Height.Set(newHeight, 0f);
 
         if (Parent is UISortableElement) {
             Parent.Height.Pixels = newHeight;
         }
 
-        if (SelectionExpanded) {
+        if (SelectionExpanded && Options is not null) {
             var passed = GetPassedOptionElements();
-            ChooserGrid.Clear();
-            ChooserGrid.AddRange(passed);
+            ChooserList.Clear();
+            ChooserList.AddRange(passed);
         }
-
-        //itemChoice.SetItem(_GetValue()?.GetID() ?? 0);
-        OptionChoice.SetItem(Value);
     }
 
     private IEnumerable<FontElement> GetPassedOptionElements() {
-        return Options.Where(option =>
-            option.Name.Contains(ChooserFilter.CurrentString, StringComparison.OrdinalIgnoreCase));
+        return Options
+            .Where(option => option.Name.Contains(ChooserFilter.CurrentString, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(option => option.Name);
     }
 
     private IEnumerable<FontElement> CreateDefinitionOptionElementList() {
-        var fontsFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-        string[] fontFiles = Directory.GetFiles(fontsFolderPath, "*.ttf|*.otf");
-        foreach (var fontFile in fontFiles) {
-            Font font;
-            if (!_loadedFonts.TryGetValue(fontFile, out font)) {
-                font = FontLoader.Manager.GetFont(fontFile, 20);
-                _loadedFonts.Add(fontFile, font);
-            }
+        foreach (var fonts in FontStatics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
+            foreach (var font in fonts) {
+                var fontName = font.FullName;
+                if (OperatingSystem.IsWindows()) {
+                    var pfc = new PrivateFontCollection();
+                    pfc.AddFontFile(font.TypefaceName);
+                    fontName = pfc.Families[0].Name;
+                }
 
-            var fontElement = new FontElement(font.FontFamily, fontFile);
-            yield return fontElement;
+                var fontElement = new FontElement(font, fontName);
+                fontElement.OnLeftClick += (_, _) => {
+                    Value = fontElement.TypefaceName;
+                    UpdateNeeded = true;
+                    SelectionExpanded = false;
+                    ValueNameUpdateNeeded = true;
+                };
+                yield return fontElement;
+            }
         }
     }
 }
@@ -158,9 +230,10 @@ internal class OptionElement : UIImage
         Scale = scale;
         Width.Set(DefaultBackgroundTexture.Width() * scale, 0f);
         Height.Set(DefaultBackgroundTexture.Height() * scale, 0f);
+        SetScale(0f);
     }
 
-    public virtual void SetScale(float scale) {
+    public virtual void SetScale(float scale, params float[] aaa) {
         Scale = scale;
         Width.Set(DefaultBackgroundTexture.Width() * scale, 0f);
         Height.Set(DefaultBackgroundTexture.Height() * scale, 0f);
@@ -175,8 +248,8 @@ internal class OptionElement : UIImage
     public virtual void SetItem(string path) {
         FilePath = path;
         Tooltip = "Load failed!";
-        if (File.Exists(path) && FontUtilities.IsTtfOrOtfFile(path)) {
-            var fontName = FontLoader.Manager.GetTypeface(path)?.Name ?? "Load failed!";
+        if (File.Exists(path) && Utilities.ModUtilities.IsTtfOrOtfFile(path)) {
+            var fontName = FontStatics.Manager.GetTypeface(path)?.Name ?? "Load failed!";
             Tooltip = fontName;
         }
     }

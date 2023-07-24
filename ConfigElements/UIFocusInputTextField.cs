@@ -3,8 +3,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameInput;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace FontLoader.ConfigElements;
 
@@ -24,15 +26,15 @@ internal class UIFocusInputTextField : UIElement
 
     public event EventHandler OnTab;
 
-    public UIFocusInputTextField(string hintText) => this._hintText = hintText;
+    public UIFocusInputTextField(string hintText) => _hintText = hintText;
 
     public void SetText(string text) {
         if (text == null)
             text = "";
-        if (!(this.CurrentString != text))
+        if (!(CurrentString != text))
             return;
-        this.CurrentString = text;
-        EventHandler onTextChange = this.OnTextChange;
+        CurrentString = text;
+        EventHandler onTextChange = OnTextChange;
         if (onTextChange == null)
             return;
         onTextChange((object) this, new EventArgs());
@@ -40,13 +42,13 @@ internal class UIFocusInputTextField : UIElement
 
     public override void LeftClick(UIMouseEvent evt) {
         Main.clrInput();
-        this.Focused = true;
+        Focused = true;
     }
 
     public override void Update(GameTime gameTime) {
-        if (!this.ContainsPoint(new Vector2((float) Main.mouseX, (float) Main.mouseY)) && Main.mouseLeft) {
-            this.Focused = false;
-            EventHandler onUnfocus = this.OnUnfocus;
+        if (!ContainsPoint(new Vector2((float) Main.mouseX, (float) Main.mouseY)) && Main.mouseLeft) {
+            Focused = false;
+            EventHandler onUnfocus = OnUnfocus;
             if (onUnfocus != null)
                 onUnfocus((object) this, new EventArgs());
         }
@@ -57,46 +59,49 @@ internal class UIFocusInputTextField : UIElement
     private static bool JustPressed(Keys key) => Main.inputText.IsKeyDown(key) && !Main.oldInputText.IsKeyDown(key);
 
     protected override void DrawSelf(SpriteBatch spriteBatch) {
-        if (this.Focused) {
+        if (Focused) {
             PlayerInput.WritingText = true;
             Main.instance.HandleIME();
-            string inputText = Main.GetInputText(this.CurrentString);
-            if (!inputText.Equals(this.CurrentString)) {
-                this.CurrentString = inputText;
-                EventHandler onTextChange = this.OnTextChange;
+            string inputText = Main.GetInputText(CurrentString);
+            if (!inputText.Equals(CurrentString)) {
+                CurrentString = inputText;
+                EventHandler onTextChange = OnTextChange;
                 if (onTextChange != null)
                     onTextChange((object) this, new EventArgs());
             }
             else
-                this.CurrentString = inputText;
+                CurrentString = inputText;
 
             if (JustPressed(Keys.Tab)) {
-                if (this.UnfocusOnTab) {
-                    this.Focused = false;
-                    EventHandler onUnfocus = this.OnUnfocus;
+                if (UnfocusOnTab) {
+                    Focused = false;
+                    EventHandler onUnfocus = OnUnfocus;
                     if (onUnfocus != null)
                         onUnfocus((object) this, new EventArgs());
                 }
 
-                EventHandler onTab = this.OnTab;
+                EventHandler onTab = OnTab;
                 if (onTab != null)
                     onTab((object) this, new EventArgs());
             }
 
-            if (++this._textBlinkerCount >= 20) {
-                this._textBlinkerState = (this._textBlinkerState + 1) % 2;
-                this._textBlinkerCount = 0;
+            if (++_textBlinkerCount >= 20) {
+                _textBlinkerState = (_textBlinkerState + 1) % 2;
+                _textBlinkerCount = 0;
             }
         }
 
-        string currentString = this.CurrentString;
-        if (this._textBlinkerState == 1 && this.Focused)
+        string currentString = CurrentString;
+        if (_textBlinkerState == 1 && Focused)
             currentString += "|";
-        CalculatedStyle dimensions = this.GetDimensions();
-        if (this.CurrentString.Length == 0 && !this.Focused)
-            Utils.DrawBorderString(spriteBatch, this._hintText, new Vector2(dimensions.X, dimensions.Y), Color.Gray);
+        var dimensions = GetDimensions();
+        var font = FontAssets.MouseText.Value;
+        var position = new Vector2(dimensions.X, dimensions.Y);
+        position.X += 6f;
+        if (CurrentString.Length == 0 && !Focused)
+            ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, _hintText, position, Color.Gray, 0.0f, Vector2.Zero, Vector2.One, spread: 1.5f);
         else
-            Utils.DrawBorderString(spriteBatch, currentString, new Vector2(dimensions.X, dimensions.Y), Color.White);
+            ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, currentString, position, Color.White, 0.0f, Vector2.Zero, Vector2.One, spread: 1.5f);
     }
 
     public delegate void EventHandler(object sender, EventArgs e);

@@ -26,6 +26,9 @@
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="SevenZip">
+      <HintPath>lib\SevenZip.dll</HintPath>
+    </Reference>
     <Reference Include="SharpFont.NetStandard">
       <HintPath>lib\SharpFont.NetStandard.dll</HintPath>
     </Reference>

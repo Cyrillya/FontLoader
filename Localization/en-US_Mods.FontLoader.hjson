@@ -1,10 +1,72 @@
+PlatformNotSupported: This mod is not supported on your platform. Only Windows is supported at this time.
+
 Configs: {
 	Config: {
 		DisplayName: Config
 
-		MouseTextFont: {
-			Label: Mouse Text Font
+		FontSearchPath: {
+			Label: Font Search Path
 			Tooltip: ""
+		}
+
+		FontPath: {
+			Label: Font Path
+			Tooltip: ""
+		}
+
+		AltFontPath: {
+			Label: Alt Font Path
+			Tooltip: ""
+		}
+
+		GeneralFontOffsetY: {
+			Label: General Font Offset Y
+			Tooltip: ""
+			Text: Hello
+		}
+
+		BigFontOffsetY: {
+			Label: Big Font Offset Y
+			Tooltip: ""
+			Text: Hello
+		}
+
+		OpenConfigOption: {
+			Label: Open Config Option
+			Tooltip: ""
+		}
+	}
+
+	FontSearchDirectory: {
+		Tooltip: ""
+
+		Mode: {
+			Label: Mode
+			Tooltip: ""
+		}
+
+		CustomPath: {
+			Label: Custom Path
+			Tooltip: ""
+		}
+	}
+
+	SearchPathMode: {
+		Tooltip: ""
+
+		SystemAndUser: {
+			Label: System And User
+			Tooltip: System And User
+		}
+
+		SystemOnly: {
+			Label: System Only
+			Tooltip: System Only
+		}
+
+		CustomPath: {
+			Label: Custom Path
+			Tooltip: Custom Path
 		}
 	}
 }

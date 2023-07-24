@@ -1,0 +1,81 @@
+PlatformNotSupported: 您的电脑系统不支持此Mod，本Mod目前仅支持 Windows
+
+Configs: {
+	Config: {
+		DisplayName: 模组配置
+
+		FontSearchPath: {
+			Label: 字体读取文件夹
+			Tooltip: 自动从被选取的文件夹中读取字体文件，以供上方选项选择
+		}
+
+		FontPath: {
+			Label: 主要字体
+			Tooltip: 游戏中大部分文字将使用该字体
+		}
+
+		AltFontPath: {
+			Label: 补充字体
+			Tooltip: 对于部分主要字体中缺少的字符，将从该字体中读取字符信息
+		}
+
+		GeneralFontOffsetY: {
+			Label: 普通字体渲染偏移
+			Tooltip: 调整偏移值，使文本贴住白线。
+			// Text: Hello
+		}
+
+		BigFontOffsetY: {
+			Label: 大型字体渲染偏移
+			Tooltip: 调整偏移值，使文本贴住白线。
+			// Text: Hello
+		}
+
+		OpenConfigOption: {
+			Label: 打开配置文件
+			Tooltip: 配置选项只有被修改过一次后才会在文件中出现相应项
+		}
+	}
+
+	FontSearchDirectory: {
+		// Tooltip: ""
+
+		Mode: {
+			// Label: Mode
+			// Tooltip: ""
+		}
+
+		CustomPath: {
+			// Label: Custom Path
+			// Tooltip: ""
+		}
+	}
+
+	SearchPathMode: {
+		// Tooltip: ""
+
+		SystemAndUser: {
+			Label: 系统和用户文件夹
+			Tooltip:
+				'''
+				从系统文件夹(默认“C:\Windows\Fonts\”)
+				和用户文件夹(默认“C:\Users\用户名\AppData\Local\Microsoft\Windows\Fonts\”)
+				读取字体文件
+				'''
+		}
+
+		SystemOnly: {
+			Label: 仅系统文件夹
+			Tooltip: 仅从系统文件夹(默认“C:\Windows\Fonts\”)读取字体文件
+		}
+
+		CustomPath: {
+			Label: 自定义文件夹
+			Tooltip:
+				'''
+				自定义读取字体文件的文件夹，在下方输入你的文件夹路径
+				请保证文件夹可被访问
+				'''
+		}
+	}
+}
