@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using FontLoader.ConfigElements;
 using FontLoader.Utilities;
-using Microsoft.Xna.Framework.Graphics;
 using Velentr.Font;
 using Terraria;
 using Terraria.Localization;
@@ -42,7 +40,7 @@ public static class Loader
 
     internal static void ProvideFonts(string mainPath, string altPath) {
         if (!ModLoaded) {
-            ModUtilities.SetLoadingText("Applying Selected Fonts");
+            ModUtilities.SetLoadingText(LocalizationKey.ApplyingFonts);
         }
 
         mainPath ??= "";
@@ -90,7 +88,7 @@ public static class Loader
         if (InstalledFontLoading) return;
 
         if (!ModLoaded) {
-            ModUtilities.SetLoadingText("Loading Installed Fonts");
+            ModUtilities.SetLoadingText(LocalizationKey.LoadingInstalled);
         }
 
         var config = ModContent.GetInstance<Config>();
@@ -132,12 +130,12 @@ public static class Loader
     private static void LoadInternalFont(Mod mod) {
         var config = ModContent.GetInstance<Config>();
         if (config.UsePingFangLite) {
-            ModUtilities.SetLoadingText("Loading Internal Font");
+            ModUtilities.SetLoadingText(LocalizationKey.LoadingInternal);
             Statics.PingFangBytes = mod.GetFileBytes("Assets/PingFangLite.otf");
             return;
         }
 
-        ModUtilities.SetLoadingText("Decompressing Internal Font");
+        ModUtilities.SetLoadingText(LocalizationKey.DecompressingInternal);
 
         var compressedBytes = mod.GetFileBytes("Assets/PingFang.otf.lzma");
         var inStream = new MemoryStream(compressedBytes);
@@ -149,29 +147,31 @@ public static class Loader
     }
 
     private static void ProvideFreeTypeDll(Mod mod) {
-        ModUtilities.SetLoadingText("Decompressing freetype6.dll");
+        ModUtilities.SetLoadingText(LocalizationKey.DecompressingDLL);
 
         string targetFilePath = AppDomain.CurrentDomain.BaseDirectory; // 保存目标路径
         const string targetFileName = @"Libraries\Native\Windows\freetype6.dll"; // 保存目标文件名
 
         string fullPath = Path.Combine(targetFilePath, targetFileName);
+        
+        // 如果Native文件夹下已经有freetype6.dll，tModLoader会自动加载，不需要我们自己加载
+        if (File.Exists(fullPath)) {
+            return;
+        }
 
-        if (!ModUtilities.IsFileOccupied(fullPath)) {
-            try {
-                using var fileStream = mod.GetFileStream("freetype6.dll");
-                using var targetStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+        try {
+            using var fileStream = mod.GetFileStream("Assets/freetype6.dll");
+            using var targetStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
 
-                fileStream.CopyTo(targetStream);
+            fileStream.CopyTo(targetStream);
 
-                Console.WriteLine(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaved")) +
-                                  targetFilePath);
-            }
-            catch (Exception ex) {
-                mod.Logger.Warn(
-                    Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaveError")), ex);
-            }
+            Console.WriteLine(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaved")) +
+                              targetFilePath);
 
-            NativeLibrary.Load(fullPath);
+            NativeLibrary.TryLoad(fullPath, out _);
+        }
+        catch (Exception ex) {
+            mod.Logger.Warn(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaveError")), ex);
         }
     }
 }

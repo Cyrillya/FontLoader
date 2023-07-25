@@ -1,6 +1,4 @@
-﻿using Velentr.Font;
-
-namespace FontLoader.Core;
+﻿namespace FontLoader.Core;
 
 public static class Unloader
 {

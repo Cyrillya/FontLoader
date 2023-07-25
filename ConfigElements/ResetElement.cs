@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using FontLoader.Core;
+﻿using FontLoader.Core;
 using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System.Reflection;
 using Velentr.Font;
 
 namespace FontLoader.Core;

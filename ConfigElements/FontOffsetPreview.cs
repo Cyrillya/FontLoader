@@ -5,8 +5,8 @@ using ReLogic.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config.UI;
-using Terraria.UI;
 using Terraria.UI.Chat;
 
 namespace FontLoader.ConfigElements;
@@ -27,6 +27,9 @@ public class FontOffsetPreview : FloatElement
         _texture = Main.Assets.Request<Texture2D>("Images/UI/CharCreation/Separator1");
     }
 
+    public virtual float GetAppliedOffset() =>
+        ModContent.GetInstance<Config>().GeneralFontOffsetY;
+
     public override void Draw(SpriteBatch spriteBatch) {
         base.Draw(spriteBatch);
 
@@ -37,6 +40,7 @@ public class FontOffsetPreview : FloatElement
         textPosition.X += 4f;
         textPosition.Y -= Font.Value.MeasureString(text.Value).Y - BaseOffset;
         textPosition.Y += (float) GetObject();
+        textPosition.Y += GetAppliedOffset();
         ChatManager.DrawColorCodedStringWithShadow(spriteBatch, Font.Value, text.Value, textPosition, Color.White, 0f,
             Vector2.Zero, Vector2.One, spread: 1.2f);
         Utils.DrawPanel(_texture.Value, 2, 0, spriteBatch, linePosition, dimensions.Width - 12f, Color.White);
@@ -52,4 +56,7 @@ public class BigFontOffsetPreview : FontOffsetPreview
         BaseOffset = 24f;
         TextKey = "Configs.Config.BigFontOffsetY.Text";
     }
+
+    public override float GetAppliedOffset() =>
+        ModContent.GetInstance<Config>().BigFontOffsetY;
 }

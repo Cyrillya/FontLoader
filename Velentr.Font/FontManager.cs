@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using FontLoader.Core;
 using Microsoft.Xna.Framework.Graphics;
 using SharpFont;
 using Velentr.Collections.Collections.Concurrent;
@@ -83,7 +85,11 @@ namespace Velentr.Font
             {
                 font.DisposeFinal();
             }
-            
+
+            while (Loader.InstalledFontLoading) {
+                Thread.Sleep(10);
+            }
+
             foreach (var font in MinimalTypefaces.Values)
             {
                 font.DisposeFinal();

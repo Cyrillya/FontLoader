@@ -1,54 +1,94 @@
 PlatformNotSupported: This mod is not supported on your platform. Only Windows is supported at this time.
+None: Not selected
 
 Configs: {
 	Config: {
-		DisplayName: Config
+		DisplayName: Mod Config
 
 		FontSearchPath: {
-			Label: Font Search Path
-			Tooltip: ""
+			Label: Fonts location
+			Tooltip:
+				'''
+				Automatically read font files from the selected folder for selection in the above options
+				You have to reload the mod to change the folder
+				'''
 		}
 
 		FontPath: {
-			Label: Font Path
-			Tooltip: ""
+			Label: Main font
+			Tooltip:
+				'''
+				Most text in the game will use this font
+				If not selected, the mod's built-in Ping Fang font will be used
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				'''
 		}
 
 		AltFontPath: {
-			Label: Alt Font Path
-			Tooltip: ""
+			Label: Substitute font
+			Tooltip:
+				'''
+				For characters missing in the main font, character information will rendered from this font
+				If not selected, the mod's built-in Ping Fang font will be used
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				'''
 		}
 
 		GeneralFontOffsetY: {
-			Label: General Font Offset Y
-			Tooltip: ""
-			Text: Hello
+			Label: Normal font render offset
+			Tooltip: Adjust the offset value to make the text fits the line.
+			Text: The quick brown fox jumps over the lazy dog
 		}
 
 		BigFontOffsetY: {
-			Label: Big Font Offset Y
-			Tooltip: ""
-			Text: Hello
+			Label: Large font render offset
+			Tooltip: Adjust the offset value to make the text fits the line.
+			Text: =rand.old()
 		}
 
 		OpenConfigOption: {
-			Label: Open Config Option
-			Tooltip: ""
+			Label: Open Config File
+			Tooltip: Any config will only appear in the file after being modified.
 		}
 
 		UseTextShadow: {
-			Label: Use Text Shadow
-			Tooltip: ""
+			Label: Use text shadow
+			Tooltip:
+				'''
+				Part of the originally stroked text will lose the stroke and be replaced by a shadow
+				This improves the performance of text rendering and makes text look better
+				'''
 		}
 
 		UsePingFangLite: {
-			Label: Use Ping Fang Lite
-			Tooltip: ""
+			Label: Load the lite version of Ping Fang font as the default font
+			Tooltip:
+				'''
+				Will increase the loading speed of this mod by about 6% and reduce the memory usage by 10 MB
+				Some non-English characters will not be displayed, so it is only recommended to use it in a English-only environment
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				'''
 		}
 
 		ResetOption: {
-			Label: Reset Option
-			Tooltip: ""
+			Label: Reload Fonts
+			Tooltip:
+				'''
+				Reloading the font may make the memory usage smaller or larger.
+				I really don't know how to reduce the memory usage. Don't use it unless necessary
+				'''
+		}
+
+		LoremIpsum: {
+			Label: Lorem Ipsum
+			Tooltip:
+				'''
+				        Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+				        Vestibulum porta commodo tempus. Aliquam laoreet congue nulla eu scelerisque. Donec tempor quam ut diam mollis, et pretium dolor tempor. Ut et eros eleifend, accumsan eros sed, pharetra lectus. Praesent vel fermentum urna, sit amet imperdiet quam. Quisque mattis ac quam sit amet blandit. Mauris cursus nunc est, a ornare nunc venenatis in. Sed justo nisl, facilisis eu feugiat at, commodo nec mi. Duis sapien nulla, suscipit nec commodo sed, laoreet in dolor. Etiam cursus non turpis ut mollis. Praesent ac luctus est. Cras varius magna mauris, non pulvinar lectus imperdiet at. Integer nisl arcu, vestibulum eu nibh nec, dictum tincidunt augue.
+
+				        Praesent scelerisque libero et metus bibendum, in sodales nulla mattis. Ut sit amet nibh id ex imperdiet mollis. Suspendisse potenti. Etiam laoreet auctor maximus. In tincidunt dui et tristique convallis. Pellentesque eget libero eget eros ultrices fermentum. Sed rutrum cursus tempus. Integer iaculis turpis massa. Nulla faucibus, ex vel congue tristique, ante est porttitor ligula, vitae ultricies nulla erat vitae diam. Ut nec neque id magna molestie fermentum. Aliquam erat volutpat. Mauris accumsan nulla vel neque pulvinar suscipit. Donec vitae pellentesque odio.
+				'''
 		}
 	}
 
@@ -70,18 +110,27 @@ Configs: {
 		Tooltip: ""
 
 		SystemAndUser: {
-			Label: System And User
-			Tooltip: System And User
+			Label: System And User Folder
+			Tooltip:
+				'''
+				Load font files from:
+				- System folder (default is "C:\Windows\Fonts\")
+				- User folder (default is "C:\Users\username\AppData\Local\Microsoft\Windows\Fonts\")
+				'''
 		}
 
 		SystemOnly: {
-			Label: System Only
-			Tooltip: System Only
+			Label: System Folder Only
+			Tooltip: Load font files from system folder only (default is "C:\Windows\Fonts\")
 		}
 
 		CustomPath: {
-			Label: Custom Path
-			Tooltip: Custom Path
+			Label: Custom Folder
+			Tooltip:
+				'''
+				Customize the folder for loading font files, enter your folder path below
+				Please make sure the folder is accessible
+				'''
 		}
 	}
 }

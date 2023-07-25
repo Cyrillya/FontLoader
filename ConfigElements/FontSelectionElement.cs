@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FontLoader.Core;
+using FontLoader.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -12,22 +12,21 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
+using Terraria.Localization;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
-using Color = Microsoft.Xna.Framework.Color;
 
 namespace FontLoader.ConfigElements;
 
 public class FontSelectionElement : ConfigElement<string>
 {
-    internal bool LoadingFonts { get; set; }
     internal bool ValueNameUpdateNeeded { get; set; }
     internal bool SettingUpOptions { get; set; }
     internal bool UpdateNeeded { get; set; }
     internal bool SelectionExpanded { get; set; }
     internal UIPanel ChooserPanel { get; set; }
-    internal UIList ChooserList { get; set; }
+    internal NestedUIList ChooserList { get; set; }
     internal UIFocusInputTextField ChooserFilter { get; set; }
     internal List<FontElement> Options { get; set; }
 
@@ -60,21 +59,15 @@ public class FontSelectionElement : ConfigElement<string>
             ValueNameUpdateNeeded = false;
 
             if (string.IsNullOrWhiteSpace(Value) || !File.Exists(Value)) {
-                fontNameText.SetText("NONE");
+                fontNameText.SetText(Language.GetTextValue("Mods.FontLoader.None"));
             }
 
             foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
                 foreach (var font in fonts) {
                     if (font.TypefaceName != Value) continue;
 
-                    var fontName = font.FullName;
-                    if (OperatingSystem.IsWindows()) {
-                        var pfc = new PrivateFontCollection();
-                        pfc.AddFontFile(font.TypefaceName);
-                        fontName = pfc.Families[0].Name;
-                    }
-
-                    fontNameText.SetText(fontName);
+                    string name = ModUtilities.GetFontName(font);
+                    fontNameText.SetText(name);
                     return;
                 }
             }
@@ -129,7 +122,7 @@ public class FontSelectionElement : ConfigElement<string>
         textBoxBackground.Append(ChooserFilter);
         ChooserPanel.Append(textBoxBackground);
 
-        ChooserList = new UIList();
+        ChooserList = new NestedUIList();
         ChooserList.Top.Set(30, 0);
         ChooserList.Height.Set(-30, 1);
         ChooserList.Width.Set(-12, 1);
@@ -196,14 +189,8 @@ public class FontSelectionElement : ConfigElement<string>
     private IEnumerable<FontElement> CreateDefinitionOptionElementList() {
         foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
             foreach (var font in fonts) {
-                var fontName = font.FullName;
-                if (OperatingSystem.IsWindows()) {
-                    var pfc = new PrivateFontCollection();
-                    pfc.AddFontFile(font.TypefaceName);
-                    fontName = pfc.Families[0].Name;
-                }
-
-                var fontElement = new FontElement(font, fontName);
+                string name = ModUtilities.GetFontName(font);
+                var fontElement = new FontElement(font, name);
                 fontElement.OnLeftClick += (_, _) => {
                     Value = fontElement.TypefaceName;
                     UpdateNeeded = true;

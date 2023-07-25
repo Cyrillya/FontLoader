@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
 using FontLoader.Core;
-using Terraria;
-using Terraria.GameContent;
-using Terraria.Localization;
 using Terraria.ModLoader.Config;
-using Velentr.Font;
 
 namespace FontLoader.ConfigElements;
 
@@ -28,8 +20,9 @@ public class Config : ModConfig
     [DefaultValue("NONE")]
     public string AltFontPath;
 
-    [CustomModConfigItem(typeof(FontSearchDirectoryElement))]
+    [ReloadRequired]
     [JsonDefaultValue("{}")]
+    [CustomModConfigItem(typeof(FontSearchDirectoryElement))]
     public FontSearchDirectory FontSearchPath;
     
     [Slider]
@@ -55,6 +48,9 @@ public class Config : ModConfig
 
     [CustomModConfigItem(typeof(ResetElement))]
     public object ResetOption;
+
+    [CustomModConfigItem(typeof(LoremIpsumElement))]
+    public object LoremIpsum;
 
     public override void OnChanged() {
         base.OnChanged();

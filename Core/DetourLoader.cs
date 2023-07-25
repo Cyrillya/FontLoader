@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
 using System.Reflection;
+using FontLoader.ConfigElements;
 using FontLoader.Utilities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using ReLogic.Graphics;
 using Terraria;
 using Terraria.GameContent;
@@ -20,6 +20,8 @@ namespace FontLoader.Core;
 
 public static class DetourLoader
 {
+    private static Config _config => ModContent.GetInstance<Config>();
+
     private delegate void DsfInternalDrawDelegate(DynamicSpriteFont self, string text, SpriteBatch spriteBatch,
         Vector2 startPosition,
         Color color, float rotation, Vector2 origin, ref Vector2 scale, SpriteEffects spriteEffects, float depth);
@@ -82,6 +84,8 @@ public static class DetourLoader
     }
 
     public static void Load() {
+        ModUtilities.SetLoadingText(LocalizationKey.AddingDetours);
+
         MonoModHooks.Add(
             typeof(DynamicSpriteFont).GetMethod("InternalDraw", BindingFlags.Instance | BindingFlags.NonPublic),
             DetourDsfInternalDraw);
@@ -93,6 +97,11 @@ public static class DetourLoader
                 new[] {typeof(string), typeof(float), typeof(CultureInfo)}, null), DetourCreateWrappedTextString);
 
         On_Utils.DrawBorderStringFourWay += (orig, sb, font, text, x, y, textColor, borderColor, origin, scale) => {
+            if (!_config.UseTextShadow) {
+                orig.Invoke(sb, font, text, x, y, textColor, borderColor, origin, scale);
+                return;
+            }
+
             float spread = 2f * font.GetSpreadMultipiler();
             sb.DrawString(font, text, new Vector2(x + spread, y + spread), borderColor * 0.7f, 0f, origin, scale,
                 SpriteEffects.None, 0f);
@@ -101,6 +110,10 @@ public static class DetourLoader
 
         On_Utils.DrawBorderStringBig +=
             (orig, spriteBatch, text, pos, color, scale, anchorx, anchory, maxCharactersDisplayed) => {
+                if (!_config.UseTextShadow) {
+                    return orig.Invoke(spriteBatch, text, pos, color, scale, anchorx, anchory, maxCharactersDisplayed);
+                }
+
                 DynamicSpriteFont value = FontAssets.DeathText.Value;
 
                 TextSnippet[] snippets = ChatManager.ParseMessage(text, color).ToArray();
@@ -121,6 +134,12 @@ public static class DetourLoader
         On_ChatManager
                 .DrawColorCodedStringShadow_SpriteBatch_DynamicSpriteFont_TextSnippetArray_Vector2_Color_float_Vector2_Vector2_float_float +=
             (orig, spriteBatch, font, snippets, position, baseColor, rotation, origin, baseScale, maxWidth, spread) => {
+                if (!_config.UseTextShadow) {
+                    orig.Invoke(spriteBatch, font, snippets, position, baseColor, rotation, origin, baseScale, maxWidth,
+                        spread);
+                    return;
+                }
+
                 spread *= font.GetSpreadMultipiler();
                 ChatManager.DrawColorCodedString(spriteBatch, font, snippets, position + new Vector2(spread), baseColor,
                     rotation, origin, baseScale, out var _, maxWidth, ignoreColors: true);
@@ -129,6 +148,12 @@ public static class DetourLoader
         On_ChatManager
                 .DrawColorCodedStringShadow_SpriteBatch_DynamicSpriteFont_string_Vector2_Color_float_Vector2_Vector2_float_float +=
             (orig, spriteBatch, font, text, position, baseColor, rotation, origin, baseScale, maxWidth, spread) => {
+                if (!_config.UseTextShadow) {
+                    orig.Invoke(spriteBatch, font, text, position, baseColor, rotation, origin, baseScale, maxWidth,
+                        spread);
+                    return;
+                }
+
                 spread *= font.GetSpreadMultipiler();
                 ChatManager.DrawColorCodedString(spriteBatch, font, text, position + new Vector2(spread), baseColor,
                     rotation, origin, baseScale, maxWidth);

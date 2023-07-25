@@ -16,7 +16,7 @@ internal class RenderTargetHolder
         TargetLookup = new Dictionary<string, RenderTarget2D>();
 
         On_Main.CheckMonoliths += orig => {
-            while (_requestQueue.TryDequeue(out var request)) {
+            while (_requestQueue.TryDequeue(out var request) && !TargetLookup.ContainsKey(request.name)) {
                 request.renderCallback(request.target);
                 TargetLookup.Add(request.name, request.target);
             }

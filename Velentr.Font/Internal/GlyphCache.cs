@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SharpFont;
@@ -111,43 +110,34 @@ namespace Velentr.Font.Internal
         /// <param name="usedFont">The font that is actual used.</param>
         /// <returns>Whether we could add the character to the cache or not.</returns>
         public bool AddCharacterToCache(char character, out Glyph glyph) {
-            bool AddGlyphInner(SharpFont.Glyph faceGlyph, BitmapGlyph bitmap, out Glyph glyph) {
-                if (_currentX + faceGlyph.Advance.X.Ceiling() >= Width) {
-                    _currentY += _font.GlyphHeight + _font.Face.Size.Metrics.NominalHeight;
-                    _currentX = 0;
-                }
-
-                if (_currentY >= Height - _font.GlyphHeight) {
-                    Full = true;
-                    glyph = null;
-                    return false;
-                }
-
-                glyph = AddGlyph(character, faceGlyph, bitmap);
-                return true;
+            var font = _font;
+            var index = font.Face.GetCharIndex(character);
+            if (index == 0 && _altFont is not null) {
+                // Character not found, use alt font
+                font = _altFont;
+                index = font.Face.GetCharIndex(character);
             }
 
-            var index = _font.Face.GetCharIndex(character);
-            _font.Face.LoadGlyph(index, _font.LoadFlags, _font.LoadTarget);
-            using var faceGlyph = _font.Face.Glyph.GetGlyph();
-            faceGlyph.ToBitmap(_font.RenderMode, Constants.GlyphBitmapOrigin, true);
+            font.Face.LoadGlyph(index, font.LoadFlags, font.LoadTarget);
+            using var faceGlyph = font.Face.Glyph.GetGlyph();
+            faceGlyph.ToBitmap(font.RenderMode, Constants.GlyphBitmapOrigin, true);
             using var bitmap = faceGlyph.ToBitmapGlyph();
 
-            if (_altFont is not null && (bitmap.Bitmap.Width == 0 || bitmap.Bitmap.Rows == 0)) {
-                index = _altFont.Face.GetCharIndex(character);
-                _altFont.Face.LoadGlyph(index, _altFont.LoadFlags, _altFont.LoadTarget);
-                using var altFaceGlyph = _altFont.Face.Glyph.GetGlyph();
-                faceGlyph.ToBitmap(_altFont.RenderMode, Constants.GlyphBitmapOrigin, true);
-                using var altBitmap = faceGlyph.ToBitmapGlyph();
-
-                bool result = AddGlyphInner(faceGlyph, bitmap, out glyph);
-                glyph.Font = _altFont;
-                return result;
+            if (_currentX + faceGlyph.Advance.X.Ceiling() >= Width) {
+                _currentY += font.GlyphHeight + font.Face.Size.Metrics.NominalHeight;
+                _currentX = 0;
             }
 
-            bool succeed = AddGlyphInner(faceGlyph, bitmap, out glyph);
-            glyph.Font = _font;
-            return succeed;
+            if (_currentY >= Height - font.GlyphHeight) {
+                Full = true;
+                glyph = null;
+                return false;
+            }
+
+            glyph = AddGlyph(character, faceGlyph, bitmap, font);
+            glyph.Font = font;
+
+            return true;
         }
 
         /// <summary>
@@ -157,10 +147,11 @@ namespace Velentr.Font.Internal
         /// <param name="glyph">The glyph.</param>
         /// <param name="bitmapGlyph">The bitmap glyph.</param>
         /// <returns>The character that we added to the cache.</returns>
-        private Glyph AddGlyph(char character, SharpFont.Glyph glyph, BitmapGlyph bitmapGlyph) {
+        private Glyph AddGlyph(char character, SharpFont.Glyph glyph, BitmapGlyph bitmapGlyph, Font font = null) {
+            font ??= _font;
             if (!(bitmapGlyph.Bitmap.Width == 0 || bitmapGlyph.Bitmap.Rows == 0)) {
                 var cBox = glyph.GetCBox(GlyphBBoxMode.Pixels);
-                var bearingY = (int) _font.Face.Size.Metrics.NominalHeight;
+                var bearingY = (int) font.Face.Size.Metrics.NominalHeight;
                 var rectangle = new Rectangle(_currentX + cBox.Left, _currentY + (bearingY - cBox.Top),
                     bitmapGlyph.Bitmap.Width, bitmapGlyph.Bitmap.Rows);
                 var dataLength = bitmapGlyph.Bitmap.BufferData.Length;
@@ -206,15 +197,15 @@ namespace Velentr.Font.Internal
 
             var advanceX = glyph.Advance.X.Ceiling();
             if (character == '\t') {
-                advanceX = Math.Abs(_font.Face.Size.Metrics.NominalWidth * _font.SpacesInTab);
+                advanceX = Math.Abs(font.Face.Size.Metrics.NominalWidth * font.SpacesInTab);
             }
 
-            var finalCharacter = new Internal.Glyph(glyph.Advance.X.Ceiling(), _font.Face.Size.Metrics.NominalHeight,
-                _font.Face.Glyph.Metrics.HorizontalBearingX.Ceiling(), _font.Face.Size.Metrics.Descender.Ceiling(),
+            var finalCharacter = new Glyph(glyph.Advance.X.Ceiling(), font.Face.Size.Metrics.NominalHeight,
+                font.Face.Glyph.Metrics.HorizontalBearingX.Ceiling(), font.Face.Size.Metrics.Descender.Ceiling(),
                 new Rectangle(_currentX, _currentY, advanceX,
-                    _font.GlyphHeight + _font.Face.Size.Metrics.NominalHeight), character, _characters.Count - 1, this);
+                    font.GlyphHeight + font.Face.Size.Metrics.NominalHeight), character, _characters.Count - 1, this);
 
-            _currentX += advanceX + _font.Face.Size.Metrics.NominalWidth;
+            _currentX += advanceX + font.Face.Size.Metrics.NominalWidth;
             return finalCharacter;
         }
     }

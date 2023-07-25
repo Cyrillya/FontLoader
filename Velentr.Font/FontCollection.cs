@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Velentr.Collections.Collections;
 using Velentr.Font.Internal;
 
 namespace Velentr.Font;
@@ -92,13 +91,13 @@ public class FontCollection : IDisposable
         var cache = _glyphCaches.FirstOrDefault(c => !c.Full);
         if (cache == null)
         {
-            cache = new GlyphCache(MainFont, _manager);
+            cache = new GlyphCache(MainFont, _manager, altFont: AltFont);
             _glyphCaches.Add(cache);
         }
 
         if (!cache.AddCharacterToCache(character, out var cachedGlyph))
         {
-            cache = new GlyphCache(MainFont, _manager);
+            cache = new GlyphCache(MainFont, _manager, altFont: AltFont);
             _glyphCaches.Add(cache);
             if (!cache.AddCharacterToCache(character, out cachedGlyph))
             {

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Drawing.Text;
-using System.Linq;
-using FontLoader.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
