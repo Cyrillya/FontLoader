@@ -8,7 +8,7 @@ public static class Unloader
         Unloading = true;
 
         UnloadFonts();
-        RenderTargetHolder.Unload();
+        FontPreviewHolder.Unload();
         UnloadStatics();
         // TestContents.Unload();
 
@@ -23,6 +23,11 @@ public static class Unloader
 
     internal static void UnloadFonts() {
         Statics.Manager?.Dispose();
+        Statics.FontDeathText?.Dispose();
+        Statics.FontMouseText?.Dispose();
+        Statics.FontCombatText?.Dispose();
+        Statics.FontCombatCrit?.Dispose();
+        Statics.FontItemStack?.Dispose();
         Statics.FontDeathText = null;
         Statics.FontMouseText = null;
         Statics.FontCombatText = null;

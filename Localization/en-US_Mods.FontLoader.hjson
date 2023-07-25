@@ -20,7 +20,8 @@ Configs: {
 				'''
 				Most text in the game will use this font
 				If not selected, the mod's built-in Ping Fang font will be used
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				You have to reload the mod to change the font
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
 				'''
 		}
 
@@ -30,7 +31,8 @@ Configs: {
 				'''
 				For characters missing in the main font, character information will rendered from this font
 				If not selected, the mod's built-in Ping Fang font will be used
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				You have to reload the mod to change the font
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
 				'''
 		}
 
@@ -48,7 +50,7 @@ Configs: {
 
 		OpenConfigOption: {
 			Label: Open Config File
-			Tooltip: Any config will only appear in the file after being modified.
+			Tooltip: Any config will only appear in the file after being modified
 		}
 
 		UseTextShadow: {
@@ -66,7 +68,7 @@ Configs: {
 				'''
 				Will increase the loading speed of this mod by about 6% and reduce the memory usage by 10 MB
 				Some non-English characters will not be displayed, so it is only recommended to use it in a English-only environment
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font.
+				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
 				'''
 		}
 
@@ -74,7 +76,7 @@ Configs: {
 			Label: Reload Fonts
 			Tooltip:
 				'''
-				Reloading the font may make the memory usage smaller or larger.
+				Reloading the font may make the memory usage smaller or larger
 				I really don't know how to reduce the memory usage. Don't use it unless necessary
 				'''
 		}

@@ -12,12 +12,14 @@ public class Config : ModConfig
     [CustomModConfigItem(typeof(OpenConfigElement))]
     public object OpenConfigOption;
 
-    [CustomModConfigItem(typeof(FontSelectionElement))]
+    [ReloadRequired]
     [DefaultValue("NONE")]
+    [CustomModConfigItem(typeof(FontSelectionElement))]
     public string FontPath;
 
-    [CustomModConfigItem(typeof(FontSelectionElement))]
+    [ReloadRequired]
     [DefaultValue("NONE")]
+    [CustomModConfigItem(typeof(FontSelectionElement))]
     public string AltFontPath;
 
     [ReloadRequired]
@@ -46,26 +48,6 @@ public class Config : ModConfig
     [DefaultValue(false)]
     public bool UsePingFangLite;
 
-    [CustomModConfigItem(typeof(ResetElement))]
-    public object ResetOption;
-
     [CustomModConfigItem(typeof(LoremIpsumElement))]
     public object LoremIpsum;
-
-    public override void OnChanged() {
-        base.OnChanged();
-        
-        if (!Loader.ModLoaded)
-            return;
-        
-        if (Loader.InstalledFontLoading)
-            return;
-
-        if (Statics.Manager is not null) {
-            Unloader.UnloadFonts();
-        }
-
-        Loader.ProvideFonts(FontPath, AltFontPath);
-        Task.Run(Loader.LoadInstalledFonts);
-    }
 }

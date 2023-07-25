@@ -31,6 +31,7 @@ namespace Velentr.Font
         /// <summary>
         /// The minimal fonts we have cached.
         /// </summary>
+        [Obsolete("d", true)]
         public readonly Dictionary<string, Typeface> MinimalTypefaces;
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Velentr.Font
         {
             _libraries = new ConcurrentPool<Library>(capacity: 1);
             Typefaces = new Dictionary<string, Typeface>();
-            MinimalTypefaces = new Dictionary<string, Typeface>();
+            // MinimalTypefaces = new Dictionary<string, Typeface>();
             fontCollections = new List<FontCollection>();
             GraphicsDevice = graphicsDevice;
         }
@@ -86,14 +87,10 @@ namespace Velentr.Font
                 font.DisposeFinal();
             }
 
-            while (Loader.InstalledFontLoading) {
-                Thread.Sleep(10);
-            }
-
-            foreach (var font in MinimalTypefaces.Values)
-            {
-                font.DisposeFinal();
-            }
+            // foreach (var font in MinimalTypefaces.Values)
+            // {
+            //     font.DisposeFinal();
+            // }
 
             foreach (var fontCollection in fontCollections) {
                 fontCollection.Dispose();
@@ -116,13 +113,13 @@ namespace Velentr.Font
         /// <returns></returns>
         public Font GetMinimalFont(string path)
         {
-            if (!MinimalTypefaces.TryGetValue(path, out var typeface))
-            {
-                typeface = new TypefaceImplementation(path, File.ReadAllBytes(path), false, null, false, this);
-
-                MinimalTypefaces.Add(path, typeface);
-            }
-
+            // if (!MinimalTypefaces.TryGetValue(path, out var typeface))
+            // {
+            //     typeface = new TypefaceImplementation(path, File.ReadAllBytes(path), false, null, false, this);
+            //
+            //     MinimalTypefaces.Add(path, typeface);
+            // }
+            var typeface = new TypefaceImplementation(path, File.ReadAllBytes(path), false, null, false, this);
             var font = typeface.GetFont(16);
             font.MinimalTextureSize = true;
             return font;

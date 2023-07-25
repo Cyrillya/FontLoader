@@ -13,9 +13,6 @@ namespace FontLoader.Core;
 
 public static class Loader
 {
-    public static bool ModLoaded { get; private set; }
-    public static bool InstalledFontLoading { get; private set; }
-
     public static void Load(Mod mod) {
         if (!OperatingSystem.IsWindows()) {
             throw new PlatformNotSupportedException(
@@ -26,22 +23,17 @@ public static class Loader
         LoadInternalFont(mod);
         LoadFonts();
         DetourLoader.Load();
-        RenderTargetHolder.Load();
+        FontPreviewHolder.Load();
         // TestContents.Load();
-
-        ModLoaded = true;
     }
-    
+
     public static void LoadFonts() {
         var config = ModContent.GetInstance<Config>();
         ProvideFonts(config.FontPath, config.AltFontPath);
-        LoadInstalledFonts();
     }
 
     internal static void ProvideFonts(string mainPath, string altPath) {
-        if (!ModLoaded) {
-            ModUtilities.SetLoadingText(LocalizationKey.ApplyingFonts);
-        }
+        ModUtilities.SetLoadingText(LocalizationKey.ApplyingFonts);
 
         mainPath ??= "";
         altPath ??= "";
@@ -84,47 +76,6 @@ public static class Loader
     }
 
     internal static void LoadInstalledFonts() {
-        // 在Config里写了开启新线程加载，防止多个线程同时执行方法，这里加个判断
-        if (InstalledFontLoading) return;
-
-        if (!ModLoaded) {
-            ModUtilities.SetLoadingText(LocalizationKey.LoadingInstalled);
-        }
-
-        var config = ModContent.GetInstance<Config>();
-
-        InstalledFontLoading = true;
-
-        var fontsFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-        if (config.FontSearchPath?.Mode is SearchPathMode.CustomPath) {
-            string customPath = config.FontSearchPath?.CustomPath;
-            if (Directory.Exists(customPath)) {
-                fontsFolderPath = customPath;
-            }
-            else {
-                return;
-            }
-        }
-        // fontsFolderPath = @"F:\Downloads\Compressed\苹方字体19.0d3e2版本_2";
-
-        var fontFiles = Directory.GetFiles(fontsFolderPath, "*.*", SearchOption.AllDirectories)
-            .Where(ModUtilities.IsTtfOrOtfFile);
-
-        var allFontFiles = fontFiles;
-
-        if (OperatingSystem.IsWindows() && config.FontSearchPath?.Mode is SearchPathMode.SystemAndUser) {
-            var localFontsFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            localFontsFolderPath = Path.Combine(localFontsFolderPath, @"Microsoft\Windows\Fonts");
-            var localFontFiles = Directory.GetFiles(localFontsFolderPath, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(ModUtilities.IsTtfOrOtfFile);
-            allFontFiles = allFontFiles.Concat(localFontFiles);
-        }
-
-        foreach (var fontFile in allFontFiles) {
-            Statics.Manager.GetMinimalFont(fontFile);
-        }
-
-        InstalledFontLoading = false;
     }
 
     private static void LoadInternalFont(Mod mod) {
@@ -153,7 +104,7 @@ public static class Loader
         const string targetFileName = @"Libraries\Native\Windows\freetype6.dll"; // 保存目标文件名
 
         string fullPath = Path.Combine(targetFilePath, targetFileName);
-        
+
         // 如果Native文件夹下已经有freetype6.dll，tModLoader会自动加载，不需要我们自己加载
         if (File.Exists(fullPath)) {
             return;

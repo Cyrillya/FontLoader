@@ -30,8 +30,8 @@ public class FontSelectionElement : ConfigElement<string>
     internal UIFocusInputTextField ChooserFilter { get; set; }
     internal List<FontElement> Options { get; set; }
 
-    private const float REGULAR_HEIGHT = 36f;
-    private const float EXPANDED_HEIGHT = 260f;
+    private const float RegularHeight = 36f;
+    private const float ExpandedHeight = 260f;
 
     public override void OnBind() {
         base.OnBind();
@@ -39,7 +39,7 @@ public class FontSelectionElement : ConfigElement<string>
         ValueNameUpdateNeeded = true;
 
         DrawLabel = false;
-        Height.Set(REGULAR_HEIGHT, 0f);
+        Height.Set(RegularHeight, 0f);
 
         var labelText = new UIText(Label, textScale: 0.9f) {
             Top = {Pixels = 12},
@@ -62,34 +62,29 @@ public class FontSelectionElement : ConfigElement<string>
                 fontNameText.SetText(Language.GetTextValue("Mods.FontLoader.None"));
             }
 
-            foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
-                foreach (var font in fonts) {
-                    if (font.TypefaceName != Value) continue;
+            foreach (var (_, fontPath, name) in FontPreviewHolder.TargetLookup) {
+                if (fontPath != Value) continue;
 
-                    string name = ModUtilities.GetFontName(font);
-                    fontNameText.SetText(name);
-                    return;
-                }
+                fontNameText.SetText(name);
+                return;
             }
         };
         Append(fontNameText);
 
         var invisibleClickBox = new UIPanel {
             Width = {Precent = 1f},
-            Height = {Pixels = REGULAR_HEIGHT},
+            Height = {Pixels = RegularHeight},
             BackgroundColor = Color.Transparent,
             BorderColor = Color.Transparent
         };
         invisibleClickBox.OnLeftClick += (_, _) => {
-            // 防止还在加载的时候就打开选择器
-            if (Loader.InstalledFontLoading) return;
             SelectionExpanded = !SelectionExpanded;
             UpdateNeeded = true;
         };
         Append(invisibleClickBox);
 
         ChooserPanel = new UIPanel();
-        ChooserPanel.Top.Set(REGULAR_HEIGHT, 0);
+        ChooserPanel.Top.Set(RegularHeight, 0);
         ChooserPanel.Left.Set(10, 0);
         ChooserPanel.Height.Set(200, 0);
         ChooserPanel.Width.Set(-20, 1);
@@ -166,7 +161,7 @@ public class FontSelectionElement : ConfigElement<string>
             Append(ChooserPanel);
         }
 
-        float newHeight = SelectionExpanded ? EXPANDED_HEIGHT : REGULAR_HEIGHT;
+        float newHeight = SelectionExpanded ? ExpandedHeight : RegularHeight;
         Height.Set(newHeight, 0f);
 
         if (Parent is UISortableElement) {
@@ -187,57 +182,16 @@ public class FontSelectionElement : ConfigElement<string>
     }
 
     private IEnumerable<FontElement> CreateDefinitionOptionElementList() {
-        foreach (var fonts in Statics.Manager.MinimalTypefaces.Values.Select(t => t.Fonts.Values)) {
-            foreach (var font in fonts) {
-                string name = ModUtilities.GetFontName(font);
-                var fontElement = new FontElement(font, name);
-                fontElement.OnLeftClick += (_, _) => {
-                    Value = fontElement.TypefaceName;
-                    UpdateNeeded = true;
-                    SelectionExpanded = false;
-                    ValueNameUpdateNeeded = true;
-                };
-                yield return fontElement;
-            }
-        }
-    }
-}
-
-internal class OptionElement : UIImage
-{
-    public static Asset<Texture2D> DefaultBackgroundTexture { get; } = TextureAssets.InventoryBack9;
-
-    public Asset<Texture2D> BackgroundTexture { get; set; } = DefaultBackgroundTexture;
-    public string Tooltip { get; set; }
-    public string FilePath { get; set; }
-
-    internal float Scale { get; set; } = .75f;
-
-    public OptionElement(float scale = .75f) : base(DefaultBackgroundTexture) {
-        Scale = scale;
-        Width.Set(DefaultBackgroundTexture.Width() * scale, 0f);
-        Height.Set(DefaultBackgroundTexture.Height() * scale, 0f);
-        SetScale(0f);
-    }
-
-    public virtual void SetScale(float scale, params float[] aaa) {
-        Scale = scale;
-        Width.Set(DefaultBackgroundTexture.Width() * scale, 0f);
-        Height.Set(DefaultBackgroundTexture.Height() * scale, 0f);
-    }
-
-    protected override void DrawSelf(SpriteBatch spriteBatch) {
-        base.DrawSelf(spriteBatch);
-        if (IsMouseHovering)
-            UICommon.TooltipMouseText(Tooltip);
-    }
-
-    public virtual void SetItem(string path) {
-        FilePath = path;
-        Tooltip = "Load failed!";
-        if (File.Exists(path) && Utilities.ModUtilities.IsTtfOrOtfFile(path)) {
-            var fontName = Statics.Manager.GetTypeface(path)?.Name ?? "Load failed!";
-            Tooltip = fontName;
+        foreach (var info in FontPreviewHolder.TargetLookup) {
+            var fontElement = new FontElement(info.Target, info.FontName);
+            fontElement.OnLeftClick += (_, _) => {
+                Value = info.FontPath;
+                UpdateNeeded = true;
+                SelectionExpanded = false;
+                ValueNameUpdateNeeded = true;
+                MouseOut(new UIMouseEvent(this, Main.MouseScreen));
+            };
+            yield return fontElement;
         }
     }
 }

@@ -15,16 +15,14 @@ namespace FontLoader.ConfigElements;
 
 public class FontElement : UIElement
 {
-    public Font Font { get; set; }
+    private readonly RenderTarget2D _renderTarget;
     public string Name { get; }
-    public string TypefaceName { get; }
 
-    public FontElement(Font font, string name) {
+    public FontElement(RenderTarget2D target, string name) {
         Width.Set(0f, 1f);
         Height.Set(32f, 0f);
-        Font = font;
+        _renderTarget = target;
         Name = name;
-        TypefaceName = font.TypefaceName;
     }
 
     protected override void DrawSelf(SpriteBatch spriteBatch) {
@@ -37,36 +35,12 @@ public class FontElement : UIElement
         ConfigElement.DrawPanel2(spriteBatch, position, TextureAssets.SettingsPanel.Value, settingsWidth, height,
             panelColor);
 
-        if (!RenderTargetHolder.TargetLookup.TryGetValue(TypefaceName, out var renderTarget) || renderTarget is null) {
-            if (Font is null) return;
-
-            Font.MinimalTextureSize = true;
-
-            renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, settingsWidth, height, false, default,
-                default, default, RenderTargetUsage.PreserveContents);
-
-            RenderTargetHolder.AddRequest(Font.TypefaceName, renderTarget, target => {
-                var reverseEffect = ModContent.Request<Effect>("FontLoader/Assets/Whiten", AssetRequestMode.ImmediateLoad).Value;
-
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, reverseEffect, Matrix.Identity);
-                Main.graphics.GraphicsDevice.SetRenderTarget(target);
-                Main.graphics.GraphicsDevice.Clear(Color.Transparent);
-
-                Font.Draw(spriteBatch, Name, Color.White, new Rectangle(0, 0, settingsWidth, height));
-
-                Main.spriteBatch.End();
-                Main.graphics.GraphicsDevice.SetRenderTarget(null);
-            });
-
-            return;
-        }
-
         position.X += 10;
         position.Y += 6;
-        spriteBatch.Draw(renderTarget, position, Color.Black);
+        spriteBatch.Draw(_renderTarget, position, Color.Black);
         position.X -= 2;
         position.Y -= 2;
-        spriteBatch.Draw(renderTarget, position, Color.White);
+        spriteBatch.Draw(_renderTarget, position, Color.White);
         // text.Draw(spriteBatch, boundaries.TopLeft(), Color.White);
     }
 }

@@ -223,7 +223,7 @@ namespace Velentr.Font
                 }
 
                 // Markdown rules
-                if (applyMarkdown && text[i] == '[' && (i > 0 && text[i - 1] != '\\'))
+                if (applyMarkdown && text[i] == '[' && i > 0 && text[i - 1] != '\\')
                 {
                     var results = ApplyMarkdownCommands(text, color, i);
                     i = results.Item1;
