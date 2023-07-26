@@ -21,7 +21,7 @@ Configs: {
 				Most text in the game will use this font
 				If not selected, the mod's built-in Ping Fang font will be used
 				You have to reload the mod to change the font
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
+				p.s. Ping Fang is a universal font made by Apple Co.
 				'''
 		}
 
@@ -32,7 +32,7 @@ Configs: {
 				For characters missing in the main font, character information will rendered from this font
 				If not selected, the mod's built-in Ping Fang font will be used
 				You have to reload the mod to change the font
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
+				p.s. Ping Fang is a universal font made by Apple Co.
 				'''
 		}
 
@@ -68,7 +68,7 @@ Configs: {
 				'''
 				Will increase the loading speed of this mod by about 6% and reduce the memory usage by 10 MB
 				Some non-English characters will not be displayed, so it is only recommended to use it in a English-only environment
-				p.s. Ping Fang is a universal font made by Apple Co. which includes the San Francisco font
+				p.s. Ping Fang is a universal font made by Apple Co.
 				'''
 		}
 
@@ -83,6 +83,7 @@ Configs: {
 
 		LoremIpsum: {
 			Label: Lorem Ipsum
+			Subtitle: '''"Lorem Ipsum is simply dummy text of the printing and typesetting industry..."'''
 			Tooltip:
 				'''
 				        Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.

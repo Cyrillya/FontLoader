@@ -40,10 +40,9 @@ internal static class FontPreviewHolder
                 return;
             }
         }
-        // fontsFolderPath = @"F:\Downloads\Compressed\苹方字体19.0d3e2版本_2";
 
         var fontFiles = Directory.GetFiles(fontsFolderPath, "*.*", SearchOption.AllDirectories)
-            .Where(ModUtilities.IsTtfOrOtfFile);
+            .Where(FontFileTypeChecker.IsFontFile);
 
         var allFontFiles = fontFiles;
 
@@ -51,9 +50,11 @@ internal static class FontPreviewHolder
             var localFontsFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             localFontsFolderPath = Path.Combine(localFontsFolderPath, @"Microsoft\Windows\Fonts");
             var localFontFiles = Directory.GetFiles(localFontsFolderPath, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(ModUtilities.IsTtfOrOtfFile);
+                .Where(FontFileTypeChecker.IsFontFile);
             allFontFiles = allFontFiles.Concat(localFontFiles);
         }
+
+        ModUtilities.SetLoadingText(LocalizationKey.SettingPreview);
 
         var whiten = ModContent.Request<Effect>("FontLoader/Assets/Whiten", AssetRequestMode.ImmediateLoad).Value;
         const int width = 650;

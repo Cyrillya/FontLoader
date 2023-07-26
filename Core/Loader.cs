@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using FontLoader.ConfigElements;
 using FontLoader.Utilities;
@@ -39,8 +40,8 @@ public static class Loader
         altPath ??= "";
         byte[] mainFontBytes;
         byte[] altFontBytes;
-        if (!ModUtilities.IsTtfOrOtfFile(mainPath)) {
-            if (!ModUtilities.IsTtfOrOtfFile(altPath)) {
+        if (!FontFileTypeChecker.IsFontFile(mainPath)) {
+            if (!FontFileTypeChecker.IsFontFile(altPath)) {
                 mainFontBytes = Statics.PingFangBytes;
                 altFontBytes = Statics.PingFangBytes;
                 mainPath = "PingFangInternal";
@@ -54,7 +55,7 @@ public static class Loader
         }
         else {
             mainFontBytes = File.ReadAllBytes(mainPath);
-            if (!ModUtilities.IsTtfOrOtfFile(altPath)) {
+            if (!FontFileTypeChecker.IsFontFile(altPath)) {
                 altFontBytes = mainFontBytes;
                 altPath = mainPath;
             }
@@ -73,9 +74,6 @@ public static class Loader
         Statics.FontCombatCrit = GetFontCollection(24);
         Statics.FontItemStack = GetFontCollection(15);
         Statics.FontDeathText = GetFontCollection(45);
-    }
-
-    internal static void LoadInstalledFonts() {
     }
 
     private static void LoadInternalFont(Mod mod) {

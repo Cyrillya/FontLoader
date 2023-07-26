@@ -39,7 +39,7 @@ public class FontOffsetPreview : FloatElement
         var textPosition = linePosition;
         textPosition.X += 4f;
         textPosition.Y -= Font.Value.MeasureString(text.Value).Y - BaseOffset;
-        textPosition.Y += (float) GetObject();
+        textPosition.Y -= (float) GetObject();
         textPosition.Y += GetAppliedOffset();
         ChatManager.DrawColorCodedStringWithShadow(spriteBatch, Font.Value, text.Value, textPosition, Color.White, 0f,
             Vector2.Zero, Vector2.One, spread: 1.2f);

@@ -15,20 +15,35 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
 using Terraria.UI.Chat;
+using Velentr.Font;
 
 namespace FontLoader.Core;
 
 public static class DetourLoader
 {
     private static Config _config => ModContent.GetInstance<Config>();
+    private static bool _drawingSpecialBorderText;
+
+    private static void SpecialBorderTextPatch(FontCollection font, string text, Rectangle boundaries, Color color,
+        float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) {
+        if (color == Color.Black) {
+            return;
+        }
+
+        boundaries.X += 2;
+        boundaries.Y += 2;
+        font.Draw(Main.spriteBatch, text, boundaries, Color.Black.MultiplyRGBA(color), rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
+        boundaries.X -= 2;
+        boundaries.Y -= 2;
+        font.Draw(Main.spriteBatch, text, boundaries, color, rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
+    }
 
     private delegate void DsfInternalDrawDelegate(DynamicSpriteFont self, string text, SpriteBatch spriteBatch,
         Vector2 startPosition,
         Color color, float rotation, Vector2 origin, ref Vector2 scale, SpriteEffects spriteEffects, float depth);
 
     private static void DetourDsfInternalDraw(DsfInternalDrawDelegate orig, DynamicSpriteFont self, string text,
-        SpriteBatch spriteBatch,
-        Vector2 position, Color color, float rotation, Vector2 origin, ref Vector2 scale,
+        SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, Vector2 origin, ref Vector2 scale,
         SpriteEffects effects, float depth) {
         if (false) {
             orig(self, text, spriteBatch, position, color, rotation, origin, ref scale, effects, depth);
@@ -46,6 +61,12 @@ public static class DetourLoader
         position.Y -= self.GetYOffset();
         // 别绘制太多文字，不然就会卡死
         var boundaries = new Rectangle((int) position.X, (int) position.Y, Main.screenWidth, Main.screenHeight);
+
+        if (_drawingSpecialBorderText && _config.UseTextShadow) {
+            SpecialBorderTextPatch(font, text, boundaries, color, rotation, origin / 2f, scale, effects, depth,
+                self.LineSpacing);
+            return;
+        }
 
         font.Draw(Main.spriteBatch, text, boundaries, color, rotation, origin / 2f, scale, effects, depth,
             self.LineSpacing);
@@ -158,6 +179,12 @@ public static class DetourLoader
                 ChatManager.DrawColorCodedString(spriteBatch, font, text, position + new Vector2(spread), baseColor,
                     rotation, origin, baseScale, maxWidth);
             };
+
+        On_Main.DrawInfoAccs += (orig, self) => {
+            _drawingSpecialBorderText = true;
+            orig.Invoke(self);
+            _drawingSpecialBorderText = false;
+        };
 
         // 这个必须留着，不然有些Hook没用，可能是因为内联了，而这边On_再Hook一次并调用原方法就不会内联了
         // On_Main.MouseTextInner += (orig, self, info) => orig.Invoke(self, info);
