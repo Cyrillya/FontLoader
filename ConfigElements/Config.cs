@@ -48,6 +48,10 @@ public class Config : ModConfig
     [DefaultValue(false)]
     public bool UsePingFangLite;
 
+    [ReloadRequired]
+    [DefaultValue(true)]
+    public bool SetupFontPreview;
+
     [CustomModConfigItem(typeof(LoremIpsumElement))]
     public object LoremIpsum;
 }

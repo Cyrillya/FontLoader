@@ -81,6 +81,11 @@ Configs: {
 				'''
 		}
 
+		SetupFontPreview: {
+			Label: Font options preview
+			Tooltip: Turning it off will reduce the loading time, but you can't preview the font style in the font selection interface
+		}
+
 		LoremIpsum: {
 			Label: Lorem Ipsum
 			Subtitle: '''"Lorem Ipsum is simply dummy text of the printing and typesetting industry..."'''

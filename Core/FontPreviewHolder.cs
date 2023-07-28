@@ -72,12 +72,18 @@ internal static class FontPreviewHolder
                 Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
                 Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-                font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
+                if (!config.SetupFontPreview) {
+                    Statics.FontItemStack.Draw(Main.spriteBatch, name, Vector2.Zero, Color.White);
+                }
+                else {
+                    font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
+                }
 
                 Main.spriteBatch.End();
                 Main.graphics.GraphicsDevice.SetRenderTarget(null);
 
-                font.DisposeFinal();
+                if (config.SetupFontPreview)
+                    font.DisposeFinal();
 
                 TargetLookup.Add(new FontPreview(renderTarget, fontFile, name));
             });

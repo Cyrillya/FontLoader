@@ -78,6 +78,11 @@ Configs: {
 				'''
 		}
 
+		SetupFontPreview: {
+			Label: 字体选项预览
+			Tooltip: 关闭后会减少加载所需时间，但你无法在字体选择界面中预览字体样式
+		}
+
 		LoremIpsum: {
 			Label: 乱数假文
 			Subtitle: “这是一个字体测试，锟斤拷烫烫烫”
