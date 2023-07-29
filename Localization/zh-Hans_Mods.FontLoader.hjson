@@ -35,6 +35,11 @@ Configs: {
 				'''
 		}
 
+		FontScale: {
+			Label: 字体尺寸
+			Tooltip: "字体尺寸的系数，你必须重新加载Mod以应用该项"
+		}
+
 		GeneralFontOffsetY: {
 			Label: 普通字体渲染偏移
 			Tooltip: 调整偏移值，使文本贴住白线。

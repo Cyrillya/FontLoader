@@ -17,6 +17,6 @@ public class ResetElement : LargerPanelElement
         base.LeftClick(evt);
 
         Unloader.UnloadFonts();
-        Loader.LoadFonts();
+        Loader.ProvideFonts();
     }
 }

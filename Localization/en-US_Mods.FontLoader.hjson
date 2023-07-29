@@ -37,6 +37,11 @@ Configs: {
 				'''
 		}
 
+		FontScale: {
+			Label: Font scale
+			Tooltip: "Font size multiplier, you have to reload the mod to apply this"
+		}
+
 		GeneralFontOffsetY: {
 			Label: Normal font render offset
 			Tooltip: Adjust the offset value to make the text fits the line.

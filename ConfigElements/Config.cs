@@ -28,6 +28,13 @@ public class Config : ModConfig
     public FontSearchDirectory FontSearchPath;
     
     [Slider]
+    [ReloadRequired]
+    [DefaultValue(1f)]
+    [Range(0.75f, 1.25f)]
+    [Increment(0.05f)]
+    public float FontScale;
+
+    [Slider]
     [DefaultValue(0f)]
     [Range(-10f, 10f)]
     [Increment(1f)]

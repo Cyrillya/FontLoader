@@ -22,22 +22,18 @@ public static class Loader
 
         ProvideFreeTypeDll(mod);
         LoadInternalFont(mod);
-        LoadFonts();
+        ProvideFonts();
         DetourLoader.Load();
         FontPreviewHolder.Load();
         // TestContents.Load();
     }
 
-    public static void LoadFonts() {
-        var config = ModContent.GetInstance<Config>();
-        ProvideFonts(config.FontPath, config.AltFontPath);
-    }
-
-    internal static void ProvideFonts(string mainPath, string altPath) {
+    internal static void ProvideFonts() {
         ModUtilities.SetLoadingText(LocalizationKey.ApplyingFonts);
 
-        mainPath ??= "";
-        altPath ??= "";
+        var config = ModContent.GetInstance<Config>();
+        string mainPath = config.FontPath ?? "";
+        string altPath = config.AltFontPath ?? "";
         byte[] mainFontBytes;
         byte[] altFontBytes;
         if (!FontFileTypeChecker.IsFontFile(mainPath)) {
@@ -64,8 +60,10 @@ public static class Loader
             }
         }
 
-        FontCollection GetFontCollection(int size) =>
-            new(Statics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, size);
+        int GetSize(int baseSize) => (int) (baseSize * config.FontScale);
+
+        FontCollection GetFontCollection(int baseSize) =>
+            new(Statics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, GetSize(baseSize));
 
         // var fontPath = @"C:\Users\Administrator\AppData\Local\Microsoft\FontCache\4\CloudFonts\Microsoft YaHei\47849284094.ttf";
         Statics.Manager = new FontManager(Main.instance.GraphicsDevice);
