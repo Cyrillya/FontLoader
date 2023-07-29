@@ -1,5 +1,6 @@
 PlatformNotSupported: This mod is not supported on your platform. Only Windows is supported at this time.
 None: Not selected
+FilterByName: Filter by Name
 
 Configs: {
 	Config: {

@@ -3,3 +3,4 @@ author = Cyrilly
 version = 1.0
 dllReferences = SharpFont.NetStandard, Velentr.Collections, SevenZip
 side = Client
+homepage = https://github.com/Cyrillya/FontLoader

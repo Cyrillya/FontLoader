@@ -108,7 +108,7 @@ public class FontSelectionElement : ConfigElement<string>
             Width = StyleDimension.FromPercent(1f),
             Color = Color.Lerp(Color.White, new Color(63, 65, 151, 255), 0.85f) * 0.9f
         });
-        ChooserFilter = new UIFocusInputTextField("Filter by Name");
+        ChooserFilter = new UIFocusInputTextField(Language.GetTextValue("Mods.FontLoader.FilterByName"));
         ChooserFilter.OnTextChange += (_, _) => { UpdateNeeded = true; };
         ChooserFilter.OnRightClick += (_, _) => ChooserFilter.SetText("");
         ChooserFilter.Width = StyleDimension.Fill;
