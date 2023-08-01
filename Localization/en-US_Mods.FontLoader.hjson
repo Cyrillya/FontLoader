@@ -39,7 +39,7 @@ Configs: {
 
 		FontScale: {
 			Label: Font scale
-			Tooltip: "Font size multiplier, you have to reload the mod to apply this"
+			Tooltip: Font size multiplier, you have to reload the mod to apply this
 		}
 
 		GeneralFontOffsetY: {

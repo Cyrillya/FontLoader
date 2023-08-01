@@ -37,7 +37,7 @@ The MIT license of Velentr.Font has been declared in the [LICENSE](LICENSE) file
 
 This mod also uses [SharpFont Library](https://github.com/squid-box/SevenZipSharp) and [Velentr.Collections Library](https://github.com/vonderborch/Velentr.Collections), the license is also stated in the [LICENSE](LICENSE) file of this mod
 
-This mod uses the [SevenZipSharp library](https://github.com/squid-box/SevenZipSharp) under [LGPL v3.0](https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License). The license allows developers and companies to use and integrate a software component released under the LGPL into their own (even proprietary) software without being required by the terms of a strong copyleft license to release the source code of their own components.
+This mod uses the [7-ZIP library](https://www.7-zip.org/) under [LGPL v3.0](https://en.wikipedia.org/wiki/GNU_Lesser_General_Public_License). The license allows developers and companies to use and integrate a software component released under the LGPL into their own (even proprietary) software without being required by the terms of a strong copyleft license to release the source code of their own components.
 
 The Windows binary of FreeType that is included in the project is redistributed under the FreeType License (FTL).
 
@@ -56,6 +56,7 @@ Copyright (c) 2023 Cyrilly
 Velentr.Font is used, Copyright (c) 2021 Christian Webber
 SharpFont is used, Copyright (c) 2012-2016 Robert Rouhani <robert.rouhani@gmail.com>
 Velentr.Collections is used, Copyright (c) 2022 Christian Webber
+7-Zip is used, Copyright (C) 1999-2023 Igor Pavlov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

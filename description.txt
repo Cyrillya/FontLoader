@@ -10,7 +10,7 @@ The built-in Ping Fang font matches well with Terraria
 =Safety Statements=
 In order to use the mod, it will copy a freetype6.dll file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
 
-This file is completely safe, if you don't believe the file I provided, you can download this file from the [url=https://www.freetype.org]FreeType official website[/url], and then put it in %SteamInstallationFolder%\Steam\steamapps \common\tModLoader\Libraries\Native\Windows\ folder. Or just don't use the mod
+This file is completely safe, if you don't believe the file I provided, you can download this file from the FreeType official website (https://www.freetype.org), and then put it in %SteamInstallationFolder%\Steam\steamapps \common\tModLoader\Libraries\Native\Windows\ folder. Or just don't use the mod
 
 =Copyright Statements=
 See github: https://github.com/Cyrillya/FontLoader
@@ -29,7 +29,7 @@ See github: https://github.com/Cyrillya/FontLoader
 =安全性说明=
 为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 freetype6.dll 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
 
-这份文件是完全安全的，如果你信不过，你可以自行在[url=https://www.freetype.org]FreeType官网[/url]下载这份文件，然后将其置于 %Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ 文件夹下。或直接不使用本Mod
+这份文件是完全安全的，如果你信不过，你可以自行在FreeType官网(https://www.freetype.org)下载这份文件，然后将其置于 %Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ 文件夹下。或直接不使用本Mod
 
 =版权声明=
 参见Github: https://github.com/Cyrillya/FontLoader

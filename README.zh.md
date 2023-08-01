@@ -52,7 +52,7 @@ Velentr.Font的MIT许可已声明于本模组的[LICENSE](LICENSE)文件中，�
 
 同属MIT协议下开源的亦有[SharpFont库](https://github.com/squid-box/SevenZipSharp)与[Velentr.Collections库](https://github.com/vonderborch/Velentr.Collections)，许可亦声明于本模组的[LICENSE](LICENSE)文件中
 
-本模组使用了在[LGPL v3.0协议](https://zh.wikipedia.org/wiki/GNU%E5%AE%BD%E9%80%9A%E7%94%A8%E5%85%AC%E5%85%B1%E8%AE%B8%E5%8F%AF%E8%AF%81)下开源的[SevenZipSharp库](https://github.com/squid-box/SevenZipSharp)，它允许企业与软件开发者使用，或将LGPL授权的软件集成至他们自己的软件内（即使该软件是私有软件也被允许），同时不会受到Copyleft特性的许可证强制对软件开源的限制。
+本模组使用了在[LGPL v3.0协议](https://zh.wikipedia.org/wiki/GNU%E5%AE%BD%E9%80%9A%E7%94%A8%E5%85%AC%E5%85%B1%E8%AE%B8%E5%8F%AF%E8%AF%81)下开源的[7-Zip库](https://www.7-zip.org/)，它允许企业与软件开发者使用，或将LGPL授权的软件集成至他们自己的软件内（即使该软件是私有软件也被允许），同时不会受到Copyleft特性的许可证强制对软件开源的限制。
 
 本模组会向用户的电脑中复制一份其包含的 FreeType Windows 二进制文件，其根据 FreeType 许可证 (FTL) 重新分发。
 
@@ -71,6 +71,7 @@ Copyright (c) 2023 Cyrilly
 Velentr.Font is used, Copyright (c) 2021 Christian Webber
 SharpFont is used, Copyright (c) 2012-2016 Robert Rouhani <robert.rouhani@gmail.com>
 Velentr.Collections is used, Copyright (c) 2022 Christian Webber
+7-Zip is used, Copyright (C) 1999-2023 Igor Pavlov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
