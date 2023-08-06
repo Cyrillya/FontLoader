@@ -59,6 +59,10 @@ public class Config : ModConfig
     [DefaultValue(true)]
     public bool SetupFontPreview;
 
+    [ReloadRequired]
+    [DefaultValue(false)]
+    public bool DebugText;
+
     [CustomModConfigItem(typeof(LoremIpsumElement))]
     public object LoremIpsum;
 }

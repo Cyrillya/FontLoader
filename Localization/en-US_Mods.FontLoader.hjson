@@ -1,6 +1,7 @@
 PlatformNotSupported: This mod is not supported on your platform. Only Windows is supported at this time.
 None: Not selected
 FilterByName: Filter by Name
+XInTotal: "{0} in total"
 
 Configs: {
 	Config: {
@@ -90,6 +91,11 @@ Configs: {
 		SetupFontPreview: {
 			Label: Font options preview
 			Tooltip: Turning it off will reduce the loading time, but you can't preview the font style in the font selection interface
+		}
+
+		DebugText: {
+			Label: Debug mode
+			Tooltip: Display some debug info in the console
 		}
 
 		LoremIpsum: {

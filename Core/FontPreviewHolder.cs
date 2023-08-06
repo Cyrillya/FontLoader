@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FontLoader.ConfigElements;
 using FontLoader.Utilities;
 using Microsoft.Xna.Framework;
@@ -9,6 +10,9 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.ModLoader;
+using Velentr.Font;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace FontLoader.Core;
 
@@ -21,12 +25,12 @@ public record struct FontPreview(RenderTarget2D Target, string FontPath, string 
 
 internal static class FontPreviewHolder
 {
-    internal static List<FontPreview> TargetLookup;
+    internal static List<FontPreview> Targets;
 
     internal static void Load() {
         ModUtilities.SetLoadingText(LocalizationKey.LoadingInstalled);
 
-        TargetLookup = new List<FontPreview>();
+        Targets = new List<FontPreview>();
 
         var config = ModContent.GetInstance<Config>();
 
@@ -54,14 +58,50 @@ internal static class FontPreviewHolder
             allFontFiles = allFontFiles.Concat(localFontFiles);
         }
 
-        ModUtilities.SetLoadingText(LocalizationKey.SettingPreview);
+        if (config.SetupFontPreview) {
+            LoadFontWithPreview(allFontFiles);
+        }
+        else {
+            LoadFontWithoutPreview(allFontFiles);
+        }
+    }
 
+    private static void LoadFontWithoutPreview(IEnumerable<string> allFontFiles) {
+        Parallel.ForEach(allFontFiles, fontFile => {
+            if (!TryLoadFonts(fontFile, out var font, out string name)) {
+                if (font is not null) {
+                    Main.RunOnMainThread(() => { font.DisposeFinal(); });
+                }
+
+                return;
+            }
+
+            Main.RunOnMainThread(() => {
+                font.DisposeFinal();
+                Targets.Add(new FontPreview(null, fontFile, name));
+            });
+        });
+        // foreach (var fontFile in allFontFiles) {
+        //     if (!TryLoadFonts(fontFile, out var font, out string name)) {
+        //         font?.DisposeFinal();
+        //         continue;
+        //     }
+        //
+        //     font.DisposeFinal();
+        //     Targets.Add(new FontPreview(null, fontFile, name));
+        // }
+    }
+
+    private static void LoadFontWithPreview(IEnumerable<string> allFontFiles) {
+        ModUtilities.SetLoadingText(LocalizationKey.SettingPreview);
         var whiten = ModContent.Request<Effect>("FontLoader/Assets/Whiten", AssetRequestMode.ImmediateLoad).Value;
         const int width = 650;
         const int height = 40;
         foreach (var fontFile in allFontFiles) {
-            var font = Statics.Manager.GetMinimalFont(fontFile);
-            string name = ModUtilities.GetFontName(font);
+            if (!TryLoadFonts(fontFile, out var font, out string name)) {
+                font?.DisposeFinal();
+                continue;
+            }
 
             Main.RunOnMainThread(() => {
                 var renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
@@ -72,25 +112,42 @@ internal static class FontPreviewHolder
                 Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
                 Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-                if (!config.SetupFontPreview) {
-                    Statics.FontItemStack.Draw(Main.spriteBatch, name, Vector2.Zero, Color.White);
-                }
-                else {
-                    font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
-                }
+                font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
 
                 Main.spriteBatch.End();
                 Main.graphics.GraphicsDevice.SetRenderTarget(null);
 
-                if (config.SetupFontPreview)
-                    font.DisposeFinal();
+                font.DisposeFinal();
 
-                TargetLookup.Add(new FontPreview(renderTarget, fontFile, name));
+                Targets.Add(new FontPreview(renderTarget, fontFile, name));
             });
         }
     }
 
+    private static bool TryLoadFonts(string fontFile, out Font font, out string name) {
+        var config = ModContent.GetInstance<Config>();
+        try {
+            font = Statics.Manager.GetMinimalFont(fontFile);
+            name = ModUtilities.GetFontName(font);
+        }
+        catch (Exception e) {
+            font = null;
+            name = null;
+            if (config.DebugText)
+                FontLoader.Instance.Logger.Warn($"Failed to load font {fontFile}: {e}");
+            return false;
+        }
+
+        if (font is null || string.IsNullOrWhiteSpace(name)) {
+            if (config.DebugText)
+                FontLoader.Instance.Logger.Warn($"Failed to load font {fontFile}");
+            return false;
+        }
+
+        return true;
+    }
+
     internal static void Unload() {
-        TargetLookup = null;
+        Targets = null;
     }
 }

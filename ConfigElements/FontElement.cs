@@ -35,6 +35,16 @@ public class FontElement : UIElement
         ConfigElement.DrawPanel2(spriteBatch, position, TextureAssets.SettingsPanel.Value, settingsWidth, height,
             panelColor);
 
+        if (_renderTarget is null) {
+            position.X += 10;
+            position.Y += 6;
+            Statics.FontItemStack.Draw(Main.spriteBatch, Name, position, Color.Black);
+            position.X -= 2;
+            position.Y -= 2;
+            Statics.FontItemStack.Draw(Main.spriteBatch, Name, position, Color.White);
+            return;
+        }
+
         position.X += 10;
         position.Y += 6;
         spriteBatch.Draw(_renderTarget, position, Color.Black);

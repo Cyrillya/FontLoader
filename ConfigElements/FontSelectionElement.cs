@@ -62,7 +62,7 @@ public class FontSelectionElement : ConfigElement<string>
                 fontNameText.SetText(Language.GetTextValue("Mods.FontLoader.None"));
             }
 
-            foreach (var (_, fontPath, name) in FontPreviewHolder.TargetLookup) {
+            foreach (var (_, fontPath, name) in FontPreviewHolder.Targets) {
                 if (fontPath != Value) continue;
 
                 fontNameText.SetText(name);
@@ -91,6 +91,16 @@ public class FontSelectionElement : ConfigElement<string>
         ChooserPanel.SetPadding(2f);
         ChooserPanel.BorderColor = Color.Transparent;
         ChooserPanel.BackgroundColor = Color.Transparent;
+        
+        string countText = Language.GetTextValue("Mods.FontLoader.XInTotal", FontPreviewHolder.Targets.Count);
+        var fontCountText = new UIText(countText) {
+            TextOriginX = 1f,
+            TextOriginY = 0.5f
+        };
+        fontCountText.Width.Set(0f, 1f);
+        fontCountText.Height.Set(30, 0f);
+        fontCountText.Top.Set(-6, 0);
+        ChooserPanel.Append(fontCountText);
 
         var textBoxBackground = new UIPanel {
             PaddingTop = 0,
@@ -182,7 +192,7 @@ public class FontSelectionElement : ConfigElement<string>
     }
 
     private IEnumerable<FontElement> CreateDefinitionOptionElementList() {
-        foreach (var info in FontPreviewHolder.TargetLookup) {
+        foreach (var info in FontPreviewHolder.Targets) {
             var fontElement = new FontElement(info.Target, info.FontName);
             fontElement.OnLeftClick += (_, _) => {
                 Value = info.FontPath;

@@ -1,6 +1,7 @@
 PlatformNotSupported: 您的电脑系统不支持此Mod，本Mod目前仅支持 Windows
 None: 未选择
 FilterByName: 搜索字体
+XInTotal: 共 {0} 个
 
 Configs: {
 	Config: {
@@ -87,6 +88,11 @@ Configs: {
 		SetupFontPreview: {
 			Label: 字体选项预览
 			Tooltip: 关闭后会减少加载所需时间，但你无法在字体选择界面中预览字体样式
+		}
+
+		DebugText: {
+			Label: 调试模式
+			Tooltip: 在控制台显示一些调试信息
 		}
 
 		LoremIpsum: {
