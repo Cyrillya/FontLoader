@@ -103,7 +103,15 @@ public static class Loader
 
         // 如果Native文件夹下已经有freetype6.dll，tModLoader会自动加载，不需要我们自己加载
         if (File.Exists(fullPath)) {
-            return;
+            var fileInfo = new FileInfo(fullPath);
+            if (fileInfo.Length > 1024 * 1024)
+                return;
+            try {
+                File.Delete(fullPath);
+            }
+            catch (Exception ex) {
+                // mod.Logger.Warn(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeDeleteError")), ex);
+            }
         }
 
         try {
