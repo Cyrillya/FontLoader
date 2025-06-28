@@ -104,28 +104,44 @@ internal static class FontPreviewHolder
             }
 
             Main.RunOnMainThread(() => {
-                try {
-                    var renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
+                RenderTarget2D renderTarget = null;
+                bool spriteBatchBegan = false;
+
+                try
+                {
+                    renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
                         default, default, RenderTargetUsage.PreserveContents);
+
+                    Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget); 
+                    Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
                     Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
                         DepthStencilState.None, RasterizerState.CullCounterClockwise, whiten, Matrix.Identity);
-                    Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
-                    Main.graphics.GraphicsDevice.Clear(Color.Transparent);
+                    spriteBatchBegan = true;
 
                     font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
 
-                    Main.spriteBatch.End();
-                    Main.graphics.GraphicsDevice.SetRenderTarget(null);
-
                     Targets.Add(new FontPreview(renderTarget, fontFile, name));
                 }
-                catch (ArgumentOutOfRangeException ex) {
+                catch (ArgumentOutOfRangeException ex)
+                {
                     FontLoader.Instance.Logger.Warn($"Font preview generation failed for '{fontFile}' ({name}): {ex.Message}");
                 }
-                finally {
-                    font.DisposeFinal();
+                catch (Exception ex)
+                {
+                    FontLoader.Instance.Logger.Warn($"Unexpected error during font preview generation for '{fontFile}' ({name}): {ex.Message}");
                 }
+                finally
+                {
+                    
+                }
+
+                if (spriteBatchBegan)
+                {
+                    Main.spriteBatch.End();
+                }
+                Main.graphics.GraphicsDevice.SetRenderTarget(null);
+                font.DisposeFinal();
             });
 
         }
