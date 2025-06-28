@@ -104,23 +104,30 @@ internal static class FontPreviewHolder
             }
 
             Main.RunOnMainThread(() => {
-                var renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
-                    default, default, RenderTargetUsage.PreserveContents);
+                try {
+                    var renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
+                        default, default, RenderTargetUsage.PreserveContents);
 
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                    DepthStencilState.None, RasterizerState.CullCounterClockwise, whiten, Matrix.Identity);
-                Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
-                Main.graphics.GraphicsDevice.Clear(Color.Transparent);
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                        DepthStencilState.None, RasterizerState.CullCounterClockwise, whiten, Matrix.Identity);
+                    Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
+                    Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-                font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
+                    font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
 
-                Main.spriteBatch.End();
-                Main.graphics.GraphicsDevice.SetRenderTarget(null);
+                    Main.spriteBatch.End();
+                    Main.graphics.GraphicsDevice.SetRenderTarget(null);
 
-                font.DisposeFinal();
-
-                Targets.Add(new FontPreview(renderTarget, fontFile, name));
+                    Targets.Add(new FontPreview(renderTarget, fontFile, name));
+                }
+                catch (ArgumentOutOfRangeException ex) {
+                    FontLoader.Instance.Logger.Warn($"Font preview generation failed for '{fontFile}' ({name}): {ex.Message}");
+                }
+                finally {
+                    font.DisposeFinal();
+                }
             });
+
         }
     }
 
