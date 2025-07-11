@@ -23,6 +23,9 @@
 <br/>
 <img src=".res/zh-void-bag.png" width="400" />
 
+## ❤️ 特别鸣谢
+超级感谢[DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4)修复了该模组在最新版tModLoader的崩溃问题！
+
 ## 🛡️ 安全性说明
 为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 `freetype6.dll` 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
 

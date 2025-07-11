@@ -25,6 +25,9 @@ Fonts in .ttf, .otf and .ttc formats are currently supported
 <br/>
 <img src=".res/en-void-bag.png" width="400" />
 
+## ❤️ Special Thanks
+Huge thanks for [DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4) to fix the mod for latest tModLoader!
+
 ## 🛡️ Safety Statements
 In order to use the mod, it will copy a `freetype6.dll` file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
 

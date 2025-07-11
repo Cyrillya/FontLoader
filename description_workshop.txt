@@ -11,10 +11,13 @@ Fonts in .ttf, .otf and .ttc formats are currently supported
     [*]The built-in Ping Fang font matches well with Terraria
 [/olist]
 
+[h2]❤️ Special Thanks[/h2]
+Huge thanks for [url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url] to fix the mod for latest tModLoader!
+
 [h2]🛡️ Safety Statements[/h2]
 In order to use the mod, it will copy a freetype6.dll file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
 
-This file is completely safe, if you don't believe the file I provided, you can download this file from the [url=https://www.freetype.org]FreeType official website[/url], and then put it in %SteamInstallationFolder%\Steam\steamapps \common\tModLoader\Libraries\Native\Windows\ folder. Or just don't use the mod
+This file is completely safe, if you don't believe the file I provided, you can download this file from the [url=https://www.freetype.org]FreeType official website[/url], and then put it in %SteamInstallationFolder%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ folder. Or just don't use the mod
 
 [h2]📗 Copyright Statements[/h2]
 See github: https://github.com/Cyrillya/FontLoader
@@ -32,6 +35,9 @@ See github: https://github.com/Cyrillya/FontLoader
     [*]阴影模式，让字体更加好看
     [*]内置苹方字体，和泰拉十分搭配
 [/olist]
+
+[h2]❤️ 特别鸣谢[/h2]
+超级感谢[url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url]修复了该模组在最新版tModLoader的崩溃问题！
 
 [h2]🛡️ 安全性说明[/h2]
 为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 freetype6.dll 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
