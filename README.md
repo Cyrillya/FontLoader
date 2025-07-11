@@ -2,6 +2,8 @@
 
 <div align="center">
 
+Now fixed for tModLoader v2025.4.3.0 Terraria v1.4.4!
+
 English | [简体中文](./README.zh.md)
 
 A mod that lets you freely choose the fonts displayed in the game

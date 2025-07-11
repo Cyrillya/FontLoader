@@ -92,15 +92,8 @@ public static class ModUtilities
         Statics.SetTextMethod.Invoke(Statics.LoadModsField.GetValue(null), new object[] {text});
     }
 
-    public static string GetFontName(Font font) {
-        var fontName = font.FullName;
-        if (OperatingSystem.IsWindows()) {
-            var pfc = new PrivateFontCollection();
-            pfc.AddFontFile(font.TypefaceName);
-            fontName = pfc.Families[0].Name;
-            fontName += $" {font.StyleName}";
-        }
-
-        return fontName;
+    public static string GetFontName(Font font)
+    {
+        return font.FullName;
     }
 }

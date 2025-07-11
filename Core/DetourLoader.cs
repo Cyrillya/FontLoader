@@ -192,9 +192,9 @@ public static class DetourLoader
         On_UIText.DrawSelf += (orig, self, spriteBatch) => orig.Invoke(self, spriteBatch);
         On_RemadeChatMonitor.DrawChat += (orig, self, chat) => orig.Invoke(self, chat);
         On_GameTipsDisplay.Draw += (orig, self) => orig.Invoke(self);
-        MonoModHooks.Add(
-            typeof(UIAutoScaleTextTextPanel<LocalizedText>).GetMethod("DrawSelf",
-                BindingFlags.NonPublic | BindingFlags.Instance),
-            (Action<object, SpriteBatch> orig, object self, SpriteBatch spriteBatch) => orig.Invoke(self, spriteBatch));
+        //MonoModHooks.Add(
+        //    typeof(UIAutoScaleTextTextPanel<LocalizedText>).GetMethod("DrawSelf",
+        //        BindingFlags.NonPublic | BindingFlags.Instance),
+        //    (Action<object, SpriteBatch> orig, object self, SpriteBatch spriteBatch) => orig.Invoke(self, spriteBatch));
     }
 }

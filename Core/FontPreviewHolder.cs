@@ -104,23 +104,46 @@ internal static class FontPreviewHolder
             }
 
             Main.RunOnMainThread(() => {
-                var renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
-                    default, default, RenderTargetUsage.PreserveContents);
+                RenderTarget2D renderTarget = null;
+                bool spriteBatchBegan = false;
 
-                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
-                    DepthStencilState.None, RasterizerState.CullCounterClockwise, whiten, Matrix.Identity);
-                Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget);
-                Main.graphics.GraphicsDevice.Clear(Color.Transparent);
+                try
+                {
+                    renderTarget = new RenderTarget2D(Main.graphics.GraphicsDevice, width, height, false, default,
+                        default, default, RenderTargetUsage.PreserveContents);
 
-                font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
+                    Main.graphics.GraphicsDevice.SetRenderTarget(renderTarget); 
+                    Main.graphics.GraphicsDevice.Clear(Color.Transparent);
 
-                Main.spriteBatch.End();
+                    Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                        DepthStencilState.None, RasterizerState.CullCounterClockwise, whiten, Matrix.Identity);
+                    spriteBatchBegan = true;
+
+                    font.Draw(Main.spriteBatch, name, Color.White, new Rectangle(0, 0, width, height));
+
+                    Targets.Add(new FontPreview(renderTarget, fontFile, name));
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    FontLoader.Instance.Logger.Warn($"Font preview generation failed for '{fontFile}' ({name}): {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    FontLoader.Instance.Logger.Warn($"Unexpected error during font preview generation for '{fontFile}' ({name}): {ex.Message}");
+                }
+                finally
+                {
+                    
+                }
+
+                if (spriteBatchBegan)
+                {
+                    Main.spriteBatch.End();
+                }
                 Main.graphics.GraphicsDevice.SetRenderTarget(null);
-
                 font.DisposeFinal();
-
-                Targets.Add(new FontPreview(renderTarget, fontFile, name));
             });
+
         }
     }
 
