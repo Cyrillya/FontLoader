@@ -37,8 +37,8 @@ public class Config : ModConfig
     [Slider]
     [ReloadRequired]
     [DefaultValue(1f)]
-    [Range(1f, 2f)]
-    [Increment(0.05f)]
+    [Range(1f, 3f)]
+    [Increment(0.5f)]
     public float RasterSupersample;
 
     [Slider]

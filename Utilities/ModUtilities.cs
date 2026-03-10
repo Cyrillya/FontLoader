@@ -103,8 +103,8 @@ public static class ModUtilities
             return 1f;
         }
 
-        if (value > 2f) {
-            return 2f;
+        if (value > 3f) {
+            return 3f;
         }
 
         return value;
