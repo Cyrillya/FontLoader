@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SharpFont;
@@ -25,6 +26,7 @@ namespace Velentr.Font.Internal
         /// Whether the glyph is generated minimal.
         /// </summary>
         private readonly bool _minimal;
+        private readonly bool _useColorTexture;
 
         /// <summary>
         /// The font the GlyphCache is associated with.
@@ -76,7 +78,9 @@ namespace Velentr.Font.Internal
             _font = font;
             _minimal = minTextureSize;
             _altFont = altFont;
-            var surfaceFormat = Constants.DEFAULT_CACHE_SURFACE_FORMAT;
+            bool vulkanRequested = Environment.GetCommandLineArgs()
+                .Any(arg => arg.Contains("vulkan", StringComparison.OrdinalIgnoreCase));
+            var surfaceFormat = vulkanRequested ? SurfaceFormat.Color : Constants.DEFAULT_CACHE_SURFACE_FORMAT;
             
             /* Since TML only supports HiDef, this part of code is useless
             switch (_manager.GraphicsDevice.GraphicsProfile) {
@@ -96,9 +100,10 @@ namespace Velentr.Font.Internal
             if (minTextureSize) {
                 Width = Constants.DEFAULT_MINIM_TEXTURE_SIZE;
                 Height = Constants.DEFAULT_MINIM_TEXTURE_SIZE;
-                surfaceFormat = Constants.MINIMAL_CACHE_SURFACE_FORMAT;
+                surfaceFormat = vulkanRequested ? SurfaceFormat.Color : Constants.MINIMAL_CACHE_SURFACE_FORMAT;
             }
 
+            _useColorTexture = surfaceFormat == SurfaceFormat.Color;
             Texture = new Texture2D(_manager.GraphicsDevice, Width, Height, false, surfaceFormat);
         }
 
@@ -173,7 +178,21 @@ namespace Velentr.Font.Internal
                 //     rectangle.Offset(Math.Abs(rectangle.Width - glyph.Advance.X.Ceiling()) / 2, 0);
                 // }
 
-                if (_minimal) {
+                if (_useColorTexture) {
+                    var drawBoundary = new Rectangle(_currentX, _currentY, glyph.Advance.X.Ceiling(),
+                        font.GlyphHeight + font.Face.Size.Metrics.NominalHeight);
+                    var clearData = new Color[drawBoundary.Width * drawBoundary.Height];
+                    Texture.SetData(0, drawBoundary, clearData, 0, clearData.Length);
+
+                    var buffer = new Color[dataLength];
+                    for (var i = 0; i < buffer.Length; i++) {
+                        byte alpha = bitmapGlyph.Bitmap.BufferData[i];
+                        buffer[i] = new Color(alpha, alpha, alpha, alpha);
+                    }
+
+                    Texture.SetData(0, rectangle, buffer, 0, dataLength);
+                }
+                else if (_minimal) {
                     var buffer = new byte[dataLength];
                     for (var i = 0; i < buffer.Length; i++) {
                         var c = bitmapGlyph.Bitmap.BufferData[i] >> 0;
