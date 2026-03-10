@@ -6,6 +6,7 @@ namespace FontLoader.Core;
 public enum LocalizationKey
 {
     DecompressingDLL,
+    DecompressingDylib,
     ApplyingFonts,
     LoadingInternal,
     DecompressingInternal,
@@ -18,6 +19,7 @@ public class PreLoadLocalization
 {
     private readonly Dictionary<LocalizationKey, string> _englishLookup = new() {
         {LocalizationKey.DecompressingDLL, "Decompressing freetype6.dll"},
+        {LocalizationKey.DecompressingDylib, "Decompressing freetype6.dylib"},
         {LocalizationKey.ApplyingFonts, "Applying Selected Fonts"},
         {LocalizationKey.LoadingInternal, "Loading Internal Font"},
         {LocalizationKey.DecompressingInternal, "Decompressing Internal Font"},
@@ -28,6 +30,7 @@ public class PreLoadLocalization
 
     private readonly Dictionary<LocalizationKey, string> _chineseLookup = new() {
         {LocalizationKey.DecompressingDLL, "正在解压 freetype6.dll"},
+        {LocalizationKey.DecompressingDylib, "正在解压 freetype6.dylib"},
         {LocalizationKey.ApplyingFonts, "正在应用选定字体"},
         {LocalizationKey.LoadingInternal, "正在加载内置字体"},
         {LocalizationKey.DecompressingInternal, "正在解压内置字体"},

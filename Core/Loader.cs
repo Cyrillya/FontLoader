@@ -135,7 +135,7 @@ public static class Loader
     }
 
     private static void ProvideFreeTypeDylib(Mod mod) {
-        ModUtilities.SetLoadingText(LocalizationKey.DecompressingDLL);
+        ModUtilities.SetLoadingText(LocalizationKey.DecompressingDylib);
 
         string targetRootPath = AppDomain.CurrentDomain.BaseDirectory;
         string targetDirectory = Path.Combine(targetRootPath, "Libraries", "Native", "OSX");
