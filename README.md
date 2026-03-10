@@ -10,22 +10,16 @@ A mod that lets you freely choose the fonts displayed in the game
 
 Fonts in .ttf, .otf and .ttc formats are currently supported
 
+Supports both Windows and macOS platforms
+
 </div>
-
-## 当前修改
-
-- 支持 macOS
-    - 需要手动编译 https://git.nas.tonycrane.cc/Terraria/freetype 得到 objs/.libs/libfreetype.6.dylib
-    - 然后放到 `~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/freetype6.dylib`
-- 添加字体超采样倍率参数
-    - 在字体栅格化时提高采样精度，提高在游戏内的字体显示清晰度
-    - 目前未知是否会对后期性能产生影响
 
 ## ✨ Features
 1. Allows you to freely choose the game font
 2. Adjustable font size
 3. Shadow mode to make fonts look better
 4. The built-in Ping Fang font matches well with Terraria
+5. Supersample option to improve font rendering quality
 
 ## 🧩 Screenshots
 <img src=".res/en-lorem-ipsum.png" width="600" />
@@ -38,9 +32,11 @@ Fonts in .ttf, .otf and .ttc formats are currently supported
 Huge thanks for [DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4) to fix the mod for latest tModLoader!
 
 ## 🛡️ Safety Statements
-In order to use the mod, it will copy a `freetype6.dll` file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
+In order to use the mod, it will copy a `freetype6.dll`/`freetype6.dylib` file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
 
-This file is completely safe, if you don't believe the file I provided, you can download this file from the [FreeType official website](https://www.freetype.org/), and then put it in `%SteamInstallationFolder%\Steam\steamapps \common\tModLoader\Libraries\Native\Windows\` folder. Or just don't use the mod
+This file is completely safe, if you don't trust the file I provided, you can download this file from the [FreeType official website](https://www.freetype.org/), and then put it in `%SteamInstallationFolder%\Steam\steamapps \common\tModLoader\Libraries\Native\Windows\` folder. Or just don't use the mod.
+
+As for macOS, you can also download the source code of FreeType and compile it yourself, then put it in `~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/freetype6.dylib`.
 
 ## 📗 Copyright Statements
 The built-in font of this mod is "[PingFang SC Regular](https://zh.wikipedia.org/zh-cn/%E8%8B%B9%E6%96%B9)", which is not used for commercial purposes, are used only inside the mod and are not used for other purposes.
