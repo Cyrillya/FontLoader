@@ -96,4 +96,17 @@ public static class ModUtilities
     {
         return font.FullName;
     }
+
+    public static float GetRasterSupersample() {
+        var value = ModContent.GetInstance<Config>().RasterSupersample;
+        if (value < 1f) {
+            return 1f;
+        }
+
+        if (value > 2f) {
+            return 2f;
+        }
+
+        return value;
+    }
 }

@@ -41,6 +41,11 @@ Configs: {
 			Tooltip: 字体尺寸的系数，你必须重新加载Mod以应用该项
 		}
 
+		RasterSupersample: {
+			Label: 光栅字体超采样
+			Tooltip: 启用后光栅字体将以更高的分辨率进行渲染，可能会提高字体的清晰度，但也会增加显存占用和降低性能
+		}
+
 		GeneralFontOffsetY: {
 			Label: 普通字体渲染偏移
 			Tooltip: 调整偏移值，使文本贴住白线。

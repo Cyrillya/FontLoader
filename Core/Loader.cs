@@ -15,10 +15,10 @@ namespace FontLoader.Core;
 public static class Loader
 {
     public static void Load(Mod mod) {
-        if (!OperatingSystem.IsWindows()) {
-            throw new PlatformNotSupportedException(
-                Language.GetTextValue(mod.GetLocalizationKey("PlatformNotSupported")));
-        }
+        // if (!OperatingSystem.IsWindows()) {
+        //     throw new PlatformNotSupportedException(
+        //         Language.GetTextValue(mod.GetLocalizationKey("PlatformNotSupported")));
+        // }
 
         ProvideFreeTypeDll(mod);
         LoadInternalFont(mod);
@@ -60,7 +60,7 @@ public static class Loader
             }
         }
 
-        int GetSize(int baseSize) => (int) (baseSize * config.FontScale);
+        int GetSize(int baseSize) => (int) Math.Ceiling(baseSize * config.FontScale * ModUtilities.GetRasterSupersample());
 
         FontCollection GetFontCollection(int baseSize) =>
             new(Statics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, GetSize(baseSize));

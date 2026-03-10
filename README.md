@@ -12,6 +12,15 @@ Fonts in .ttf, .otf and .ttc formats are currently supported
 
 </div>
 
+## 当前修改
+
+- 支持 macOS
+    - 需要手动编译 https://git.nas.tonycrane.cc/Terraria/freetype 得到 objs/.libs/libfreetype.6.dylib
+    - 然后放到 `~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/freetype6.dylib`
+- 添加字体超采样倍率参数
+    - 在字体栅格化时提高采样精度，提高在游戏内的字体显示清晰度
+    - 目前未知是否会对后期性能产生影响
+
 ## ✨ Features
 1. Allows you to freely choose the game font
 2. Adjustable font size

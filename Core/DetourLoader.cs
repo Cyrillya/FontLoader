@@ -24,7 +24,7 @@ public static class DetourLoader
     private static Config _config => ModContent.GetInstance<Config>();
     private static bool _drawingSpecialBorderText;
 
-    private static void SpecialBorderTextPatch(FontCollection font, string text, Rectangle boundaries, Color color,
+    private static void SpecialBorderTextPatch(SpriteBatch spriteBatch, FontCollection font, string text, Rectangle boundaries, Color color,
         float rotation, Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) {
         if (color == Color.Black) {
             return;
@@ -32,10 +32,10 @@ public static class DetourLoader
 
         boundaries.X += 2;
         boundaries.Y += 2;
-        font.Draw(Main.spriteBatch, text, boundaries, Color.Black.MultiplyRGBA(color), rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
+        font.Draw(spriteBatch, text, boundaries, Color.Black.MultiplyRGBA(color), rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
         boundaries.X -= 2;
         boundaries.Y -= 2;
-        font.Draw(Main.spriteBatch, text, boundaries, color, rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
+        font.Draw(spriteBatch, text, boundaries, color, rotation, origin / 2f, scale, effects, layerDepth, lineSpacing);
     }
 
     private delegate void DsfInternalDrawDelegate(DynamicSpriteFont self, string text, SpriteBatch spriteBatch,
@@ -45,42 +45,71 @@ public static class DetourLoader
     private static void DetourDsfInternalDraw(DsfInternalDrawDelegate orig, DynamicSpriteFont self, string text,
         SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, Vector2 origin, ref Vector2 scale,
         SpriteEffects effects, float depth) {
+        if (spriteBatch is null || self is null || text is null) {
+            orig(self, text, spriteBatch, position, color, rotation, origin, ref scale, effects, depth);
+            return;
+        }
+
         if (false) {
             orig(self, text, spriteBatch, position, color, rotation, origin, ref scale, effects, depth);
             color = Color.CornflowerBlue;
         }
 
-        var font = self.GetVelentrFont();
+        try {
+            var font = self.GetVelentrFont();
+            float supersample = ModUtilities.GetRasterSupersample();
 
-        if (font is null || Unloader.Unloading) {
+            if (font is null || Unloader.Unloading) {
+                orig(self, text, spriteBatch, position, color, rotation, origin, ref scale, effects, depth);
+                return;
+            }
+
+            // TR的字体绘制似乎比正常绘制高一点，这里做个修正
+            position.Y -= self.GetYOffset() / supersample;
+            var renderScale = scale / supersample;
+            var renderOrigin = origin * supersample;
+            int lineSpacing = (int) Math.Round(self.LineSpacing * supersample);
+            // 别绘制太多文字，不然就会卡死
+            var boundaries = new Rectangle((int) position.X, (int) position.Y, Main.screenWidth, Main.screenHeight);
+
+            if (_drawingSpecialBorderText && _config.UseTextShadow) {
+                SpecialBorderTextPatch(spriteBatch, font, text, boundaries, color, rotation, renderOrigin / 2f, renderScale, effects,
+                    depth, lineSpacing);
+                return;
+            }
+
+            font.Draw(spriteBatch, text, boundaries, color, rotation, renderOrigin / 2f, renderScale, effects,
+                depth, lineSpacing);
+        }
+        catch {
             orig(self, text, spriteBatch, position, color, rotation, origin, ref scale, effects, depth);
-            return;
         }
-
-        // TR的字体绘制似乎比正常绘制高一点，这里做个修正
-        position.Y -= self.GetYOffset();
-        // 别绘制太多文字，不然就会卡死
-        var boundaries = new Rectangle((int) position.X, (int) position.Y, Main.screenWidth, Main.screenHeight);
-
-        if (_drawingSpecialBorderText && _config.UseTextShadow) {
-            SpecialBorderTextPatch(font, text, boundaries, color, rotation, origin / 2f, scale, effects, depth,
-                self.LineSpacing);
-            return;
-        }
-
-        font.Draw(Main.spriteBatch, text, boundaries, color, rotation, origin / 2f, scale, effects, depth,
-            self.LineSpacing);
     }
 
     private delegate Vector2 DsfMeasureStringDelegate(DynamicSpriteFont self, string text);
 
     private static Vector2 DetourDsfMeasureString(DsfMeasureStringDelegate orig, DynamicSpriteFont self, string text) {
+        if (text is null) {
+            return orig(self, text);
+        }
+
         if (!Program.IsMainThread || Unloader.Unloading) {
             return orig(self, text);
         }
 
-        var font = self.GetVelentrFont();
-        return font?.MeasureText(text, self.LineSpacing) ?? orig(self, text);
+        try {
+            var font = self.GetVelentrFont();
+            if (font is null) {
+                return orig(self, text);
+            }
+
+            float supersample = ModUtilities.GetRasterSupersample();
+            int lineSpacing = (int) Math.Round(self.LineSpacing * supersample);
+            return font.MeasureText(text, lineSpacing) / supersample;
+        }
+        catch {
+            return orig(self, text);
+        }
     }
 
     private delegate string DsfCreateWrappedTextDelegate(DynamicSpriteFont self, string text, float maxWidth,
@@ -89,19 +118,29 @@ public static class DetourLoader
     private static string DetourCreateWrappedTextString(DsfCreateWrappedTextDelegate orig, DynamicSpriteFont self,
         string text,
         float maxWidth, CultureInfo culture) {
+        if (text is null) {
+            return orig(self, text, maxWidth, culture);
+        }
+
         if (!Program.IsMainThread || Unloader.Unloading) {
             return orig(self, text, maxWidth, culture);
         }
 
-        var font = self.GetVelentrFont();
+        try {
+            var font = self.GetVelentrFont();
 
-        if (font is null) {
+            if (font is null) {
+                return orig(self, text, maxWidth, culture);
+            }
+
+            float supersample = ModUtilities.GetRasterSupersample();
+            var wrappedTextBuilder = new WrappedTextBuilder(font, maxWidth * supersample, culture);
+            wrappedTextBuilder.Append(text);
+            return wrappedTextBuilder.ToString();
+        }
+        catch {
             return orig(self, text, maxWidth, culture);
         }
-
-        var wrappedTextBuilder = new WrappedTextBuilder(font, maxWidth, culture);
-        wrappedTextBuilder.Append(text);
-        return wrappedTextBuilder.ToString();
     }
 
     public static void Load() {
