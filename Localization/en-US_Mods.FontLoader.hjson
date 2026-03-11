@@ -45,7 +45,11 @@ Configs: {
 
 		RasterSupersample: {
 			Label: Raster Font Supersampling
-			Tooltip: When enabled, raster fonts will be rendered at a higher resolution, which may improve font clarity but also increase VRAM usage and reduce performance.
+			Tooltip:
+				'''
+				When enabled, raster fonts will be rendered at a higher resolution, which may improve font clarity but also increase VRAM usage and reduce performance.
+				[c/FF3333:EXPERIMENTAL. There may be bugs]
+				'''
 		}
 
 		GeneralFontOffsetY: {

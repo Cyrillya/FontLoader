@@ -43,7 +43,11 @@ Configs: {
 
 		RasterSupersample: {
 			Label: 光栅字体超采样
-			Tooltip: 启用后光栅字体将以更高的分辨率进行渲染，可能会提高字体的清晰度，但也会增加显存占用和降低性能
+			Tooltip:
+				'''
+				启用后光栅字体将以更高的分辨率进行渲染，可能会提高字体的清晰度，但也会增加显存占用和降低性能
+				[c/FF3333:实验性内容。可能会出现Bug]
+				'''
 		}
 
 		GeneralFontOffsetY: {
