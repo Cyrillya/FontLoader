@@ -15,12 +15,16 @@ namespace FontLoader.Core;
 public static class Loader
 {
     public static void Load(Mod mod) {
-        if (!OperatingSystem.IsWindows()) {
+        if (OperatingSystem.IsWindows()) {
+            ProvideFreeTypeDll(mod);
+        }
+        else if (OperatingSystem.IsMacOS()) {
+            ProvideFreeTypeDylib(mod);
+        } else {
             throw new PlatformNotSupportedException(
                 Language.GetTextValue(mod.GetLocalizationKey("PlatformNotSupported")));
         }
 
-        ProvideFreeTypeDll(mod);
         LoadInternalFont(mod);
         ProvideFonts();
         DetourLoader.Load();
@@ -60,7 +64,7 @@ public static class Loader
             }
         }
 
-        int GetSize(int baseSize) => (int) (baseSize * config.FontScale);
+        int GetSize(int baseSize) => (int) Math.Ceiling(baseSize * config.FontScale * ModUtilities.GetRasterSupersample());
 
         FontCollection GetFontCollection(int baseSize) =>
             new(Statics.Manager, mainPath, mainFontBytes, altPath, altFontBytes, GetSize(baseSize));
@@ -124,6 +128,40 @@ public static class Loader
                               targetFilePath);
 
             NativeLibrary.TryLoad(fullPath, out _);
+        }
+        catch (Exception ex) {
+            mod.Logger.Warn(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaveError")), ex);
+        }
+    }
+
+    private static void ProvideFreeTypeDylib(Mod mod) {
+        ModUtilities.SetLoadingText(LocalizationKey.DecompressingDylib);
+
+        string targetRootPath = AppDomain.CurrentDomain.BaseDirectory;
+        string targetDirectory = Path.Combine(targetRootPath, "Libraries", "Native", "OSX");
+        string targetPath = Path.Combine(targetDirectory, "freetype6.dylib");
+
+        bool isArm = Environment.GetCommandLineArgs()
+            .Any(arg => string.Equals(arg, "-arm", StringComparison.OrdinalIgnoreCase));
+        string sourceAsset = isArm ? "Assets/freetype6.arm.dylib" : "Assets/freetype6.x86.dylib";
+
+        try {
+            Directory.CreateDirectory(targetDirectory);
+
+            if (File.Exists(targetPath)) {
+                if (DylibArchitectureChecker.HasExpectedArch(targetPath, isArm, out var archSummary))
+                    return;
+
+                File.Delete(targetPath);
+            }
+
+            using var fileStream = mod.GetFileStream(sourceAsset);
+            using var targetStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
+
+            fileStream.CopyTo(targetStream);
+
+            Console.WriteLine(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaved")) + targetPath);
+            NativeLibrary.TryLoad(targetPath, out _);
         }
         catch (Exception ex) {
             mod.Logger.Warn(Language.GetTextValue(mod.GetLocalizationKey("FreeTypeSaveError")), ex);

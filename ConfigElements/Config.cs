@@ -35,6 +35,13 @@ public class Config : ModConfig
     public float FontScale;
 
     [Slider]
+    [ReloadRequired]
+    [DefaultValue(1f)]
+    [Range(1f, 3f)]
+    [Increment(0.5f)]
+    public float RasterSupersample;
+
+    [Slider]
     [DefaultValue(0f)]
     [Range(-10f, 10f)]
     [Increment(1f)]

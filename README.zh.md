@@ -8,6 +8,8 @@
 
 目前支持.ttf, .otf和.ttc格式的字体
 
+支持Windows和macOS平台
+
 </div>
 
 ## ✨ 功能
@@ -15,6 +17,7 @@
 2. 可调整字体的大小
 3. 阴影模式，让字体更加好看
 4. 内置苹方字体，和泰拉十分搭配
+5. 光栅字体超采样选项，提高字体渲染质量
 
 ## 🧩 截图
 <img src=".res/zh-lorem-ipsum.png" width="600" />
@@ -27,9 +30,11 @@
 超级感谢[DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4)修复了该模组在最新版tModLoader的崩溃问题！
 
 ## 🛡️ 安全性说明
-为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 `freetype6.dll` 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
+为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 `freetype6.dll`/`freetype6.dylib` 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
 
-这份文件是完全安全的，如果你信不过，你可以自行在[FreeType官网](https://www.freetype.org/)下载这份文件，然后将其置于 `%Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\` 文件夹下。或直接不使用本Mod
+这份文件是完全安全的，如果你信不过，你可以自行在[FreeType官网](https://www.freetype.org/)下载这份文件，然后将其置于 `%Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\` 文件夹下。或直接不使用本Mod。
+
+对于macOS，你也可以下载FreeType的源代码并自行编译，然后将其放置在 `~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/` 目录下并重命名为 `freetype6.dylib`。
 
 ## 📗 版权声明
 本模组内置字体为“[PingFang SC Regular](https://zh.wikipedia.org/zh-cn/%E8%8B%B9%E6%96%B9)”，并不将其用于商业用途，仅用于模组内部，不会将其用于其他用途。

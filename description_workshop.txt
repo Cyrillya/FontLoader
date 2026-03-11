@@ -2,6 +2,7 @@
 [h2][url=https://discord.gg/rEmGMQv5z7] Discord [/url][/h2]
 A mod that allows you to freely choose the fonts displayed in the game
 Fonts in .ttf, .otf and .ttc formats are currently supported
+Supports both Windows and macOS platforms
 
 [h2]✨ Features[/h2]
 [olist]
@@ -9,15 +10,18 @@ Fonts in .ttf, .otf and .ttc formats are currently supported
     [*]Adjustable font size
     [*]Shadow mode to make fonts look better
     [*]The built-in Ping Fang font matches well with Terraria
+    [*]Supersample option to improve font rendering quality
 [/olist]
 
 [h2]❤️ Special Thanks[/h2]
 Huge thanks for [url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url] to fix the mod for latest tModLoader!
 
 [h2]🛡️ Safety Statements[/h2]
-In order to use the mod, it will copy a freetype6.dll file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
+In order to use the mod, it will copy a freetype6.dll/freetype6.dylib file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
 
 This file is completely safe, if you don't believe the file I provided, you can download this file from the [url=https://www.freetype.org]FreeType official website[/url], and then put it in %SteamInstallationFolder%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ folder. Or just don't use the mod
+
+As for macOS, you can also download the source code of FreeType and compile it yourself, then put it in ~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/freetype6.dylib.
 
 [h2]📗 Copyright Statements[/h2]
 See github: https://github.com/Cyrillya/FontLoader
@@ -27,6 +31,7 @@ See github: https://github.com/Cyrillya/FontLoader
 [h1]Terraria 字体加载器[/h1]
 一个让你可以自由选择游戏中显示的字体的模组
 目前支持.ttf, .otf和.ttc格式的字体
+支持Windows和macOS平台  
 
 [h2]✨ 功能[/h2]
 [olist]
@@ -34,15 +39,18 @@ See github: https://github.com/Cyrillya/FontLoader
     [*]可调整字体的大小
     [*]阴影模式，让字体更加好看
     [*]内置苹方字体，和泰拉十分搭配
+    [*]光栅字体超采样选项，提高字体渲染质量
 [/olist]
 
 [h2]❤️ 特别鸣谢[/h2]
 超级感谢[url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url]修复了该模组在最新版tModLoader的崩溃问题！
 
 [h2]🛡️ 安全性说明[/h2]
-为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 freetype6.dll 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
+为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 freetype6.dll/freetype6.dylib 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
 
-这份文件是完全安全的，如果你信不过，你可以自行在[url=https://www.freetype.org]FreeType官网[/url]下载这份文件，然后将其置于 %Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ 文件夹下。或直接不使用本Mod
+这份文件是完全安全的，如果你信不过，你可以自行在[url=https://www.freetype.org]FreeType官网[/url]下载这份文件，然后将其置于 %Steam安装文件夹%\Steam\steamapps\common\tModLoader\Libraries\Native\Windows\ 文件夹下。或直接不使用本Mod。
+
+对于macOS，你也可以下载FreeType的源代码并自行编译，然后将其放置在 ~/Library/Application Support/Steam/steamapps/common/tModLoader/Libraries/Native/OSX/ 目录下并重命名为 freetype6.dylib。
 
 [h2]📗 版权声明[/h2]
 参见Github: https://github.com/Cyrillya/FontLoader
