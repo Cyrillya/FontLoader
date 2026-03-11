@@ -15,6 +15,7 @@ Supports both Windows and macOS platforms
 
 [h2]❤️ Special Thanks[/h2]
 Huge thanks for [url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url] to fix the mod for latest tModLoader!
+Huge thanks for [url=https://github.com/Cyrillya/FontLoader/pull/5]TonyCrane[/url] to add MacOS/Vulkan support and font supersampling function!
 
 [h2]🛡️ Safety Statements[/h2]
 In order to use the mod, it will copy a freetype6.dll/freetype6.dylib file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
@@ -44,6 +45,7 @@ See github: https://github.com/Cyrillya/FontLoader
 
 [h2]❤️ 特别鸣谢[/h2]
 超级感谢[url=https://github.com/Cyrillya/FontLoader/pull/4]DarksideAlex[/url]修复了该模组在最新版tModLoader的崩溃问题！
+超级感谢[url=https://github.com/Cyrillya/FontLoader/pull/5]TonyCrane[/url]添加了对MacOS/Vulkan的支持与字体超采样功能！
 
 [h2]🛡️ 安全性说明[/h2]
 为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 freetype6.dll/freetype6.dylib 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。

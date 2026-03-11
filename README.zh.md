@@ -28,6 +28,7 @@
 
 ## ❤️ 特别鸣谢
 超级感谢[DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4)修复了该模组在最新版tModLoader的崩溃问题！
+超级感谢[TonyCrane](https://github.com/Cyrillya/FontLoader/pull/5)添加了对MacOS/Vulkan的支持与字体超采样功能！
 
 ## 🛡️ 安全性说明
 为了正常使用本模组的功能，本模组会向用户的电脑中复制一份 `freetype6.dll`/`freetype6.dylib` 文件，这是必需的，若缺失这份文件你将无法使用本模组的任何功能。
