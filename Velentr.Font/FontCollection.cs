@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Velentr.Font.Internal;
 
 namespace Velentr.Font;
@@ -36,7 +37,7 @@ public class FontCollection : IDisposable
     /// <summary>
     /// The calculation cache.
     /// </summary>
-    private Dictionary<(string, Rectangle, float, Vector2, Vector2, SpriteEffects, float), List<(Vector2, Glyph)>> _calculationCache = new();
+    private Dictionary<(string text, Vector2 size, int lineSpacing, SpriteEffects effects), List<(Vector2, Glyph)>> _layoutCache = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FontCollection"/> class.
@@ -117,17 +118,7 @@ public class FontCollection : IDisposable
     /// <param name="color">The color.</param>
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, int lineSpacing = 0) {
-        var key = (text, boundaries, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, lineSpacing);
-        if (_calculationCache.TryGetValue(key, out var items)) {
-            foreach (var (position, character) in items) {
-                float rotation = key.Item3;
-                var origin = key.Item4;
-                var scale = key.Item5;
-                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary, color, rotation, origin, scale, SpriteEffects.None, 0f);
-            }
-
-            return;
-        }
+        var key = (text, boundaries.Size(), lineSpacing, SpriteEffects.None);
 
         var warpLine = boundaries.Width > 0;
         var offsetX = 0;
@@ -141,6 +132,17 @@ public class FontCollection : IDisposable
         var finalCharacterIndex = text.Length - 1;
 
         var currentColor = color;
+        if (_layoutCache.TryGetValue(key, out var items)) {
+            foreach (var (position, character) in items) {
+                float rotation = 0;
+                var origin = Vector2.Zero;
+                var scale = Vector2.One;
+                spriteBatch.Draw(character.GlyphCache.Texture, position + boundaries.TopLeft(), character.Boundary, color, rotation, origin, scale, SpriteEffects.None, 0f);
+            }
+
+            return;
+        }
+
         var infos = new List<(Vector2, Glyph)>();
         for (var i = 0; i < text.Length; i++) {
             TryGetGlyph(text[i], out var cachedCharacter, out var font);
@@ -170,9 +172,10 @@ public class FontCollection : IDisposable
                 underrun = 0;
             }
 
-            var position = new Vector2(boundaries.X + offsetX, boundaries.Y + offsetY);
+            var position = new Vector2(offsetX, offsetY);
 
             infos.Add((position, cachedCharacter));
+            position += boundaries.TopLeft();
 
             spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, position, cachedCharacter.Boundary, currentColor, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);
             offsetX += cachedCharacter.Boundary.Width;
@@ -190,7 +193,7 @@ public class FontCollection : IDisposable
             }
         }
 
-        _calculationCache.Add(key, infos);
+        _layoutCache.Add(key, infos);
     }
     
     /// <summary>
@@ -219,14 +222,8 @@ public class FontCollection : IDisposable
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, float rotation,
         Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) {
-        var key = (text, boundaries, rotation, origin, scale, effects, lineSpacing);
-        if (_calculationCache.TryGetValue(key, out var items)) {
-            foreach (var (position, character) in items) {
-                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary, color, rotation, origin, scale, effects, 0f);
-            }
-
-            return;
-        }
+        // 考虑一下把 lineSpacing 从缓存键移动到缓存值？
+        var key = (text, boundaries.Size(), lineSpacing, effects);
 
         // calculate the rest of the text position
         var warpLine = boundaries.Width > 0;
@@ -241,53 +238,73 @@ public class FontCollection : IDisposable
         var finalCharacterIndex = text.Length - 1;
 
         var currentColor = color;
+        var flippedVertically = effects.HasFlag(SpriteEffects.FlipVertically);
+        var flippedHorizontally = effects.HasFlag(SpriteEffects.FlipHorizontally);
+
+        if (flippedVertically || flippedHorizontally) {
+            if (flippedHorizontally) {
+                origin.X *= -1;
+            }
+
+            if (flippedVertically) {
+                origin.Y *= -1;
+            }
+        }
+        var transformation = Matrix.Identity;
+        float cos, sin = 0;
+        var xScale = flippedHorizontally ? -scale.X : scale.X;
+        var yScale = flippedVertically ? -scale.Y : scale.Y;
+        var xOrigin = -origin.X;
+        var yOrigin = -origin.Y;
+        // Handle our rotation as required
+        if (Helpers.FloatsAreEqual(rotation, 0) || Helpers.FloatsAreEqual(rotation / Constants.TWO_PI, 1)) {
+            transformation.M11 = xScale;
+            transformation.M22 = yScale;
+            transformation.M41 = xOrigin * transformation.M11 + boundaries.X;
+            transformation.M42 = yOrigin * transformation.M22 + boundaries.Y;
+        }
+        else {
+            cos = (float) Math.Cos(rotation);
+            sin = (float) Math.Sin(rotation);
+            transformation.M11 = xScale * cos;
+            transformation.M12 = xScale * sin;
+            transformation.M21 = yScale * -sin;
+            transformation.M22 = yScale * cos;
+            transformation.M41 = (xOrigin * transformation.M11 + yOrigin * transformation.M21) + boundaries.X;
+            transformation.M42 = (xOrigin * transformation.M12 + yOrigin * transformation.M22) + boundaries.Y;
+        }
+
+        if (_layoutCache.TryGetValue(key, out var items)) {
+            foreach (var (_position, character) in items) {
+                var position = _position;
+                Vector2.Transform(ref position, ref transformation, out position);
+                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary,
+                    color, rotation, origin, scale, effects, layerDepth);
+            }
+
+            return;
+        }
         var infos = new List<(Vector2, Glyph)>();
+
         for (var i = 0; i < text.Length; i++) {
             TryGetGlyph(text[i], out var cachedCharacter, out var font);
             lineSpacing = lineSpacing is 0 ? cachedCharacter.AdvanceY : lineSpacing;
 
             // calculate our transformation matrix
-            var flipAdjustment = Vector2.Zero;
-            var flippedVertically = effects.HasFlag(SpriteEffects.FlipVertically);
-            var flippedHorizontally = effects.HasFlag(SpriteEffects.FlipHorizontally);
 
+            var flipAdjustment = Vector2.Zero;
+            
             // if we've flipped, handle adjusting our location as required
             if (flippedVertically || flippedHorizontally) {
                 var size = font.MeasureText(text);
 
                 if (flippedHorizontally) {
-                    origin.X *= -1;
                     flipAdjustment.X -= size.X;
                 }
 
                 if (flippedVertically) {
-                    origin.Y *= -1;
                     flipAdjustment.Y = font.GlyphHeight - size.Y;
                 }
-            }
-
-            // Handle our rotation as required
-            var transformation = Matrix.Identity;
-            float cos, sin = 0;
-            var xScale = flippedHorizontally ? -scale.X : scale.X;
-            var yScale = flippedVertically ? -scale.Y : scale.Y;
-            var xOrigin = flipAdjustment.X - origin.X;
-            var yOrigin = flipAdjustment.Y - origin.Y;
-            if (Helpers.FloatsAreEqual(rotation, 0) || Helpers.FloatsAreEqual(rotation / Constants.TWO_PI, 1)) {
-                transformation.M11 = xScale;
-                transformation.M22 = yScale;
-                transformation.M41 = xOrigin * transformation.M11 + boundaries.X;
-                transformation.M42 = yOrigin * transformation.M22 + boundaries.Y;
-            }
-            else {
-                cos = (float) Math.Cos(rotation);
-                sin = (float) Math.Sin(rotation);
-                transformation.M11 = xScale * cos;
-                transformation.M12 = xScale * sin;
-                transformation.M21 = yScale * -sin;
-                transformation.M22 = yScale * cos;
-                transformation.M41 = (xOrigin * transformation.M11 + yOrigin * transformation.M21) + boundaries.X;
-                transformation.M42 = (xOrigin * transformation.M12 + yOrigin * transformation.M22) + boundaries.Y;
             }
 
             if (warpLine && offsetX + cachedCharacter.Boundary.Width + countX > width || text[i] == '\n') {
@@ -314,10 +331,10 @@ public class FontCollection : IDisposable
                 underrun = 0;
             }
 
-            var characterPosition = new Vector2(offsetX, offsetY);
-            Vector2.Transform(ref characterPosition, ref transformation, out characterPosition);
-
+            var characterPosition = new Vector2(offsetX, offsetY) + flipAdjustment;
             infos.Add((characterPosition, cachedCharacter));
+
+            Vector2.Transform(ref characterPosition, ref transformation, out characterPosition);
 
             spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, characterPosition, cachedCharacter.Boundary,
                 currentColor, rotation, origin, scale, effects, layerDepth);
@@ -336,7 +353,7 @@ public class FontCollection : IDisposable
             }
         }
 
-        _calculationCache.Add(key, infos);
+        _layoutCache.Add(key, infos);
     }
 
     /// <summary>
@@ -442,7 +459,7 @@ public class FontCollection : IDisposable
 
     public void Dispose() {
         TextCache.Clear();
-        _calculationCache.Clear();
+        _layoutCache.Clear();
         _glyphCaches.Clear();
         CharacterGlyphs.Clear();
     }
