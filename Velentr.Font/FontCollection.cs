@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +33,11 @@ public class FontCollection : IDisposable
     public Font MainFont;
     public Font AltFont;
     
+    /// <summary>
+    /// The calculation cache.
+    /// </summary>
+    private Dictionary<(string, Rectangle, float, Vector2, Vector2, SpriteEffects, float), List<(Vector2, Glyph)>> _calculationCache = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FontCollection"/> class.
     /// </summary>
@@ -112,6 +117,18 @@ public class FontCollection : IDisposable
     /// <param name="color">The color.</param>
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, int lineSpacing = 0) {
+        var key = (text, boundaries, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, lineSpacing);
+        if (_calculationCache.TryGetValue(key, out var items)) {
+            foreach (var (position, character) in items) {
+                float rotation = key.Item3;
+                var origin = key.Item4;
+                var scale = key.Item5;
+                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary, color, rotation, origin, scale, SpriteEffects.None, 0f);
+            }
+
+            return;
+        }
+
         var warpLine = boundaries.Width > 0;
         var offsetX = 0;
         var offsetY = 0;
@@ -124,6 +141,7 @@ public class FontCollection : IDisposable
         var finalCharacterIndex = text.Length - 1;
 
         var currentColor = color;
+        var infos = new List<(Vector2, Glyph)>();
         for (var i = 0; i < text.Length; i++) {
             TryGetGlyph(text[i], out var cachedCharacter, out var font);
             lineSpacing = lineSpacing is 0 ? cachedCharacter.AdvanceY : lineSpacing;
@@ -154,6 +172,8 @@ public class FontCollection : IDisposable
 
             var position = new Vector2(boundaries.X + offsetX, boundaries.Y + offsetY);
 
+            infos.Add((position, cachedCharacter));
+
             spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, position, cachedCharacter.Boundary, currentColor, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);
             offsetX += cachedCharacter.Boundary.Width;
 
@@ -169,6 +189,8 @@ public class FontCollection : IDisposable
                 }
             }
         }
+
+        _calculationCache.Add(key, infos);
     }
     
     /// <summary>
@@ -197,6 +219,14 @@ public class FontCollection : IDisposable
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, float rotation,
         Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) {
+        var key = (text, boundaries, rotation, origin, scale, effects, lineSpacing);
+        if (_calculationCache.TryGetValue(key, out var items)) {
+            foreach (var (position, character) in items) {
+                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary, color, rotation, origin, scale, effects, 0f);
+            }
+
+            return;
+        }
 
         // calculate the rest of the text position
         var warpLine = boundaries.Width > 0;
@@ -211,6 +241,7 @@ public class FontCollection : IDisposable
         var finalCharacterIndex = text.Length - 1;
 
         var currentColor = color;
+        var infos = new List<(Vector2, Glyph)>();
         for (var i = 0; i < text.Length; i++) {
             TryGetGlyph(text[i], out var cachedCharacter, out var font);
             lineSpacing = lineSpacing is 0 ? cachedCharacter.AdvanceY : lineSpacing;
@@ -286,6 +317,8 @@ public class FontCollection : IDisposable
             var characterPosition = new Vector2(offsetX, offsetY);
             Vector2.Transform(ref characterPosition, ref transformation, out characterPosition);
 
+            infos.Add((characterPosition, cachedCharacter));
+
             spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, characterPosition, cachedCharacter.Boundary,
                 currentColor, rotation, origin, scale, effects, layerDepth);
             offsetX += cachedCharacter.Boundary.Width;
@@ -302,6 +335,8 @@ public class FontCollection : IDisposable
                 }
             }
         }
+
+        _calculationCache.Add(key, infos);
     }
 
     /// <summary>
@@ -407,6 +442,7 @@ public class FontCollection : IDisposable
 
     public void Dispose() {
         TextCache.Clear();
+        _calculationCache.Clear();
         _glyphCaches.Clear();
         CharacterGlyphs.Clear();
     }
