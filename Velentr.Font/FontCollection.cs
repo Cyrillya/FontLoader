@@ -33,11 +33,11 @@ public class FontCollection : IDisposable
 
     public Font MainFont;
     public Font AltFont;
-    
+
     /// <summary>
     /// The calculation cache.
     /// </summary>
-    private Dictionary<(string text, Vector2 size, int lineSpacing, SpriteEffects effects), List<(Vector2, Glyph)>> _layoutCache = new();
+    private Dictionary<(string text, Vector2 size, int lineSpacing), (Vector2 size, List<(Vector2, Glyph)> glyphs)> _layoutCache = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FontCollection"/> class.
@@ -48,14 +48,14 @@ public class FontCollection : IDisposable
         AltFont = altFont;
         manager.AddFontCollection(this);
     }
-    
+
     public FontCollection(FontManager manager, string mainFontName, byte[] mainFontBytes, string altFontName, byte[] altFontBytes, int size) {
         _manager = manager;
         MainFont = manager.GetFont(mainFontName, mainFontBytes, size);
         AltFont = manager.GetFont(altFontName, altFontBytes, size);
         manager.AddFontCollection(this);
     }
-    
+
     public FontCollection(FontManager manager, string mainFontPath, string altFontPath, int size) {
         _manager = manager;
         MainFont = manager.GetFont(mainFontPath, size);
@@ -118,7 +118,7 @@ public class FontCollection : IDisposable
     /// <param name="color">The color.</param>
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, int lineSpacing = 0) {
-        var key = (text, boundaries.Size(), lineSpacing, SpriteEffects.None);
+        var key = (text, boundaries.Size(), lineSpacing);
 
         var warpLine = boundaries.Width > 0;
         var offsetX = 0;
@@ -133,7 +133,7 @@ public class FontCollection : IDisposable
 
         var currentColor = color;
         if (_layoutCache.TryGetValue(key, out var items)) {
-            foreach (var (position, character) in items) {
+            foreach (var (position, character) in items.glyphs) {
                 float rotation = 0;
                 var origin = Vector2.Zero;
                 var scale = Vector2.One;
@@ -143,6 +143,7 @@ public class FontCollection : IDisposable
             return;
         }
 
+        float realXBoundary = 0, realYBoundary = 0;
         var infos = new List<(Vector2, Glyph)>();
         for (var i = 0; i < text.Length; i++) {
             TryGetGlyph(text[i], out var cachedCharacter, out var font);
@@ -179,6 +180,8 @@ public class FontCollection : IDisposable
 
             spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, position, cachedCharacter.Boundary, currentColor, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);
             offsetX += cachedCharacter.Boundary.Width;
+            realXBoundary = Math.Max(offsetX, realXBoundary);
+            realYBoundary = Math.Max(offsetY + lineSpacing, realYBoundary);
 
             // calculate kerning
             if (i != finalCharacterIndex) {
@@ -193,9 +196,9 @@ public class FontCollection : IDisposable
             }
         }
 
-        _layoutCache.Add(key, infos);
+        _layoutCache.Add(key, (new(realXBoundary, realYBoundary), infos));
     }
-    
+
     /// <summary>
     /// Draws the text to the screen at the specified position and with the specified color.
     /// </summary>
@@ -209,6 +212,9 @@ public class FontCollection : IDisposable
 
     /// <summary>
     /// Draws the text to the screen at the specified position and with the specified color.
+    /// <br />
+    /// if i understood correctly, it should draw text block on the left-top corner of boundaries,
+    /// then scale/rotate by origin.
     /// </summary>
     /// <param name="spriteBatch">The sprite batch.</param>
     /// <param name="text">The text.</param>
@@ -223,7 +229,7 @@ public class FontCollection : IDisposable
     public void Draw(SpriteBatch spriteBatch, string text, Rectangle boundaries, Color color, float rotation,
         Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) {
         // 考虑一下把 lineSpacing 从缓存键移动到缓存值？
-        var key = (text, boundaries.Size(), lineSpacing, effects);
+        var key = (text, boundaries.Size(), lineSpacing);
 
         // calculate the rest of the text position
         var warpLine = boundaries.Width > 0;
@@ -241,119 +247,106 @@ public class FontCollection : IDisposable
         var flippedVertically = effects.HasFlag(SpriteEffects.FlipVertically);
         var flippedHorizontally = effects.HasFlag(SpriteEffects.FlipHorizontally);
 
-        if (flippedVertically || flippedHorizontally) {
-            if (flippedHorizontally) {
-                origin.X *= -1;
-            }
+        if (!_layoutCache.TryGetValue(key, out var items)) {
+            float realXBoundary = 0, realYBoundary = 0;
+            var infos = new List<(Vector2, Glyph)>();
 
-            if (flippedVertically) {
-                origin.Y *= -1;
-            }
-        }
-        var transformation = Matrix.Identity;
-        float cos, sin = 0;
-        var xScale = flippedHorizontally ? -scale.X : scale.X;
-        var yScale = flippedVertically ? -scale.Y : scale.Y;
-        var xOrigin = -origin.X;
-        var yOrigin = -origin.Y;
-        // Handle our rotation as required
-        if (Helpers.FloatsAreEqual(rotation, 0) || Helpers.FloatsAreEqual(rotation / Constants.TWO_PI, 1)) {
-            transformation.M11 = xScale;
-            transformation.M22 = yScale;
-            transformation.M41 = xOrigin * transformation.M11 + boundaries.X;
-            transformation.M42 = yOrigin * transformation.M22 + boundaries.Y;
-        }
-        else {
-            cos = (float) Math.Cos(rotation);
-            sin = (float) Math.Sin(rotation);
-            transformation.M11 = xScale * cos;
-            transformation.M12 = xScale * sin;
-            transformation.M21 = yScale * -sin;
-            transformation.M22 = yScale * cos;
-            transformation.M41 = (xOrigin * transformation.M11 + yOrigin * transformation.M21) + boundaries.X;
-            transformation.M42 = (xOrigin * transformation.M12 + yOrigin * transformation.M22) + boundaries.Y;
-        }
+            for (var i = 0; i < text.Length; i++) {
+                TryGetGlyph(text[i], out var cachedCharacter, out var font);
+                lineSpacing = lineSpacing is 0 ? cachedCharacter.AdvanceY : lineSpacing;
 
-        if (_layoutCache.TryGetValue(key, out var items)) {
-            foreach (var (_position, character) in items) {
-                var position = _position;
-                Vector2.Transform(ref position, ref transformation, out position);
-                spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary,
-                    color, rotation, origin, scale, effects, layerDepth);
-            }
+                // calculate our transformation matrix
 
-            return;
-        }
-        var infos = new List<(Vector2, Glyph)>();
+                var flipAdjustment = Vector2.Zero;
 
-        for (var i = 0; i < text.Length; i++) {
-            TryGetGlyph(text[i], out var cachedCharacter, out var font);
-            lineSpacing = lineSpacing is 0 ? cachedCharacter.AdvanceY : lineSpacing;
-
-            // calculate our transformation matrix
-
-            var flipAdjustment = Vector2.Zero;
-            
-            // if we've flipped, handle adjusting our location as required
-            if (flippedVertically || flippedHorizontally) {
-                var size = font.MeasureText(text);
-
-                if (flippedHorizontally) {
-                    flipAdjustment.X -= size.X;
+                if (warpLine && offsetX + cachedCharacter.Boundary.Width + countX > width || text[i] == '\n') {
+                    offsetX = 0;
+                    underrun = 0;
+                    offsetY += lineSpacing;
                 }
 
-                if (flippedVertically) {
-                    flipAdjustment.Y = font.GlyphHeight - size.Y;
+                if (text[i] == '\r' || text[i] == '\n') {
+                    continue;
                 }
-            }
 
-            if (warpLine && offsetX + cachedCharacter.Boundary.Width + countX > width || text[i] == '\n') {
-                offsetX = 0;
-                underrun = 0;
-                offsetY += lineSpacing;
-            }
+                if (offsetY > height || !warpLine && offsetX > width) {
+                    break;
+                }
 
-            if (text[i] == '\r' || text[i] == '\n') {
-                continue;
-            }
+                // calculate underrun
+                underrun += -cachedCharacter.BearingX;
+                if (offsetX == 0) {
+                    offsetX += underrun;
+                }
 
-            if (offsetY > height || !warpLine && offsetX > width) {
-                break;
-            }
+                if (underrun <= 0) {
+                    underrun = 0;
+                }
 
-            // calculate underrun
-            underrun += -cachedCharacter.BearingX;
-            if (offsetX == 0) {
-                offsetX += underrun;
-            }
+                var characterPosition = new Vector2(offsetX, offsetY) + flipAdjustment;
+                infos.Add((characterPosition, cachedCharacter));
 
-            if (underrun <= 0) {
-                underrun = 0;
-            }
+                offsetX += cachedCharacter.Boundary.Width;
+                realXBoundary = Math.Max(offsetX, realXBoundary);
+                realYBoundary = Math.Max(offsetY + lineSpacing, realYBoundary);
 
-            var characterPosition = new Vector2(offsetX, offsetY) + flipAdjustment;
-            infos.Add((characterPosition, cachedCharacter));
-
-            Vector2.Transform(ref characterPosition, ref transformation, out characterPosition);
-
-            spriteBatch.Draw(cachedCharacter.GlyphCache.Texture, characterPosition, cachedCharacter.Boundary,
-                currentColor, rotation, origin, scale, effects, layerDepth);
-            offsetX += cachedCharacter.Boundary.Width;
-
-            // calculate kerning
-            if (i != finalCharacterIndex) {
-                var nextCharacter = text[i + 1];
-                if (TryGetGlyph(nextCharacter, out var nextCachedCharacter, out _)) {
-                    var kerning = font.GetKerning(cachedCharacter, nextCachedCharacter);
-                    var maxBounds = cachedCharacter.AdvanceX * Constants.Settings.KerningSanityMultiplier;
-                    if (kerning <= maxBounds && kerning >= -maxBounds) {
-                        offsetX += kerning;
+                // calculate kerning
+                if (i != finalCharacterIndex) {
+                    var nextCharacter = text[i + 1];
+                    if (TryGetGlyph(nextCharacter, out var nextCachedCharacter, out _)) {
+                        var kerning = font.GetKerning(cachedCharacter, nextCachedCharacter);
+                        var maxBounds = cachedCharacter.AdvanceX * Constants.Settings.KerningSanityMultiplier;
+                        if (kerning <= maxBounds && kerning >= -maxBounds) {
+                            offsetX += kerning;
+                        }
                     }
                 }
             }
+
+            _layoutCache.Add(key, items = (new(realXBoundary, realYBoundary), infos));
         }
 
-        _layoutCache.Add(key, infos);
+        var xScale = scale.X;
+        var yScale = scale.Y;
+        var transformation =
+            Matrix.Identity
+            //* Matrix.CreateScale(flippedHorizontally ? -1 : 1, flippedVertically ? -1 : 1, 1)
+            //* Matrix.CreateTranslation(flippedHorizontally ? items.size.X : 0, flippedVertically ? items.size.Y : 0, 0)
+            //* Matrix.CreateTranslation(-origin.X, -origin.Y, 0)
+            //* Matrix.CreateScale(xScale, yScale, 1)
+            //* Matrix.CreateRotationZ(rotation)
+            //* Matrix.CreateTranslation(origin.X, origin.Y, 0)
+            //* Matrix.CreateTranslation(boundaries.X, boundaries.Y, 0)
+            ;
+        // inline all matrix calculation
+        var sx = flippedHorizontally ? -1 : 1;
+        var sy = flippedVertically ? -1 : 1;
+        var tx = flippedHorizontally ? items.size.X : 0;
+        var ty = flippedVertically ? items.size.Y : 0;
+        if (Helpers.FloatsAreEqual(rotation, 0) || Helpers.FloatsAreEqual(rotation / Constants.TWO_PI, 1)) {
+            transformation.M11 = xScale * sx;
+            transformation.M22 = yScale * sy;
+            transformation.M41 = xScale * tx - xScale * origin.X + origin.X + boundaries.X;
+            transformation.M42 = yScale * ty - yScale * origin.Y + origin.Y + boundaries.Y;
+        } else {
+            var cos = (float)Math.Cos(rotation);
+            var sin = (float)Math.Sin(rotation);
+            transformation.M11 = cos * xScale * sx;
+            transformation.M12 = sin * xScale * sx;
+            transformation.M21 = -sin * yScale * sy;
+            transformation.M22 = cos * yScale * sy;
+            transformation.M41 = cos * xScale * tx - cos * xScale * origin.X - sin * yScale * ty + sin * yScale * origin.Y + origin.X + boundaries.X;
+            transformation.M42 = sin * xScale * tx - sin * xScale * origin.X + cos * yScale * ty - cos * yScale * origin.Y + origin.Y + boundaries.Y;
+        }
+
+        scale *= new Vector2(flippedHorizontally ? -1 : 1, flippedVertically ? -1 : 1);
+        foreach (var (_position, character) in items.glyphs)
+        {
+            var position = _position;
+            Vector2.Transform(ref position, ref transformation, out position);
+            spriteBatch.Draw(character.GlyphCache.Texture, position, character.Boundary,
+                color, rotation, Vector2.Zero, scale, SpriteEffects.None, layerDepth);
+        }
     }
 
     /// <summary>
@@ -371,7 +364,7 @@ public class FontCollection : IDisposable
     /// <param name="lineSpacing">The line spacing.</param>
     public void Draw(SpriteBatch spriteBatch, string text, Vector2 position, Color color, float rotation,
         Vector2 origin, Vector2 scale, SpriteEffects effects, float layerDepth, int lineSpacing = 0) =>
-        Draw(spriteBatch, text, new Rectangle((int) position.X, (int) position.Y, 9999999, 9999999), color, rotation,
+        Draw(spriteBatch, text, new Rectangle((int)(position.X - origin.X), (int)(position.Y - origin.Y), 9999999, 9999999), color, rotation,
             origin, scale, effects, layerDepth, lineSpacing);
 
     /// <summary>
