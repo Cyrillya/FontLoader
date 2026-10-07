@@ -37,7 +37,7 @@ public class FontCollection : IDisposable
     /// <summary>
     /// The calculation cache.
     /// </summary>
-    private Dictionary<(string text, Vector2 size, int lineSpacing), (Vector2 size, List<(Vector2, Glyph)> glyphs)> _layoutCache = new();
+    private LRUDictionary<(string text, Vector2 size, int lineSpacing), (Vector2 size, List<(Vector2, Glyph)> glyphs)> _layoutCache = new(4096);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FontCollection"/> class.
