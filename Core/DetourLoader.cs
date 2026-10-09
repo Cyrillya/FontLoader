@@ -70,15 +70,15 @@ public static class DetourLoader
             var renderOrigin = origin * supersample;
             int lineSpacing = (int) Math.Round(self.LineSpacing * supersample);
             // 别绘制太多文字，不然就会卡死
-            var boundaries = new Rectangle((int) position.X, (int) position.Y, Main.screenWidth, Main.screenHeight);
+            var boundaries = new Rectangle((int)(position.X - renderOrigin.X), (int)(position.Y - renderOrigin.Y), Main.screenWidth, Main.screenHeight);
 
             if (_drawingSpecialBorderText && _config.UseTextShadow) {
-                SpecialBorderTextPatch(spriteBatch, font, text, boundaries, color, rotation, renderOrigin / 2f, renderScale, effects,
+                SpecialBorderTextPatch(spriteBatch, font, text, boundaries, color, rotation, renderOrigin, renderScale, effects,
                     depth, lineSpacing);
                 return;
             }
 
-            font.Draw(spriteBatch, text, boundaries, color, rotation, renderOrigin / 2f, renderScale, effects,
+            font.Draw(spriteBatch, text, boundaries, color, rotation, renderOrigin, renderScale, effects,
                 depth, lineSpacing);
         }
         catch {
