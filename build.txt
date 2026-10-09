@@ -1,6 +1,6 @@
 displayName = Font Loader
 author = Cyrilly
-version = 1.3.4
+version = 1.3.5
 dllReferences = SharpFont.NetStandard, Velentr.Collections, SevenZip, System.Drawing.Common
 side = Client
 homepage = https://github.com/Cyrillya/FontLoader

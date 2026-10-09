@@ -31,6 +31,7 @@ Supports both Windows and macOS platforms
 ## ❤️ Special Thanks
 Huge thanks for [DarksideAlex](https://github.com/Cyrillya/FontLoader/pull/4) to fix the mod for latest tModLoader!
 Huge thanks for [TonyCrane](https://github.com/Cyrillya/FontLoader/pull/5) to add MacOS/Vulkan support and font supersampling function!
+Huge thanks for [wuke32767](https://github.com/Cyrillya/FontLoader/pull/9) to optimize cache for FontCollection!
 
 ## 🛡️ Safety Statements
 In order to use the mod, it will copy a `freetype6.dll`/`freetype6.dylib` file to the user's computer, which is necessary. If you lack this file, you will not be able to use any functions of this mod
